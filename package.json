@@ -1,0 +1,23 @@
+{
+  "name": "projeto-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/camillycsantos-ship-it/Projeto-BackEnd.git"
+  },
+  "keywords": [],
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/camillycsantos-ship-it/Projeto-BackEnd/issues"
+  },
+  "homepage": "https://github.com/camillycsantos-ship-it/Projeto-BackEnd#readme",
+  "dependencies": {
+    "express": "^5.3.0",
+    "nodemon": "^3.1.14"
+  }
+}
