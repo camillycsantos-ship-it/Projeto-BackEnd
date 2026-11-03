@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrar - AdotaPET</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="/">AdotaPET</a>
+        <nav aria-label="Navegação principal">
+            <a href="/">Início</a>
+            <a href="/conta">Cadastro</a>
+            <a href="/animais">Animais</a>
+            <a href="/abrigos">Abrigos</a>
+            <a href="/contact">Contato</a>
+        </nav>
+    </header>
+
+    <main class="registration-page">
+        <section class="registration-card" aria-labelledby="login-title">
+            <p class="eyebrow">Que bom ter você de volta</p>
+            <h1 id="login-title">Entrar na sua conta</h1>
+            <p class="registration-intro">Acesse sua conta AdotaPET para continuar.</p>
+
+            <form class="registration-form" id="formLogin">
+                <div class="form-field">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" placeholder="voce@exemplo.com" autocomplete="email" required>
+                </div>
+                <div class="form-field">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" name="senha" placeholder="Sua senha" autocomplete="current-password" required>
+                </div>
+                <button class="button registration-submit" type="submit">Entrar</button>
+            </form>
+            <p class="registration-message" id="mensagem" aria-live="polite"></p>
+            <p class="login-register-link">Ainda não tem conta? <a href="/conta">Cadastre-se</a></p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>AdotaPET — Adoção responsável transforma vidas.</p>
+    </footer>
+    <script src="/login.js"></script>
+</body>
+</html>

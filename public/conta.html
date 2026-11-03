@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="/">AdotaPET</a>
+        <nav aria-label="Navegação principal">
+            <a href="/">Início</a>
+            <a href="/conta" aria-current="page">Cadastro</a>
+            <a href="/animais">Animais</a>
+            <a href="/abrigos">Abrigos</a>
+            <a href="/contact">Contato</a>
+        </nav>
+    </header>
+
+    <main class="registration-page">
+        <section class="registration-card" aria-labelledby="registration-title">
+            <p class="eyebrow">Faça parte da nossa comunidade</p>
+            <h1 id="registration-title">Crie sua conta</h1>
+            <p class="registration-intro">Cadastre-se para acompanhar sua jornada de adoção com o AdotaPET.</p>
+
+            <form class="registration-form" id="formCadastro">
+                <div class="form-field">
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" name="nome" placeholder="Como podemos te chamar?" autocomplete="name" required>
+                </div>
+                <div class="form-field">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" placeholder="voce@exemplo.com" autocomplete="email" required>
+                </div>
+                <div class="form-field">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" name="senha" placeholder="Crie uma senha" autocomplete="new-password" required>
+                </div>
+                <button class="button registration-submit" type="submit">Criar conta</button>
+            </form>
+            <p class="registration-message" id="mensagem" aria-live="polite"></p>
+            <p class="login-register-link">Já tem conta? <a href="/login">Entrar</a></p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>AdotaPET — Adoção responsável transforma vidas.</p>
+    </footer>
+    <script src="cadastro.js"></script>
+</body>
+</html>

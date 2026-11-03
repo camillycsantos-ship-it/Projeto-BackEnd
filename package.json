@@ -18,9 +18,15 @@
   "homepage": "https://github.com/camillycsantos-ship-it/Projeto-BackEnd#readme",
   "dependencies": {
     "dotenv": "^18.0.9",
+    "env": "^0.0.2",
     "express": "^5.3.0",
     "mongodb": "^7.8.0",
     "mongoose": "^9.11.4",
     "nodemon": "^3.1.14"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
   }
 }

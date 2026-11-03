@@ -1,54 +1,35 @@
 import express from "express";
 import Animal from "./models/Animal.js";
+import Usuario from "./models/Usuario.js";
+import Abrigo from "./models/Abrigo.js";
 
 const app = express();
 app.use(express.json());
-
-function buscaAnimal(id){
-    return Animal.findIndex(Animal => {
-        return Animal.id === Number(id);
-    })
-}
-
-//-----------GET---------//
 
 app.get("/", (req, res) => {
     res.status(200).sendFile('index.html', { root: 'public'});
 });
 
-//app.get("/animais", (req, res) => {
-//    res.status(200).json(animais);
-//});
+app.get("/conta", (req, res) => {
+    res.status(200).sendFile('conta.html', { root: 'public'});
+});
+
+app.get("/login", (req, res) => {
+    res.status(200).sendFile('login.html', { root: 'public'});
+});
+
+app.get("/abrigos", (req, res) => {
+    res.status(200).sendFile('abrigos.html', { root: 'public'});
+});
 
 app.get("/animais", async (req, res) => {
     const animais = await Animal.find();
     res.status(200).json(animais);
 });
 
-//app.get("/animais", (req, res) => {
-//    res.status(200).sendFile('animais.html', { root: 'public'});
-//});
-
 app.get("/contact", (req, res) => {
     res.status(200).sendFile('contact.html', { root: 'public'});
 });
-
-//-----------POST---------//
-
-//app.post("/animais", (req, res) => {
-//    const { nome, especie, idade, situacao } = req.body;
-//
-//    const novoAnimal = {
-//        id: animais.length + 1,
-//        nome,
-//        especie,
-//        idade,
-//        situacao: situacao || "Disponivel"
-//    };
-//
-//    animais.push(novoAnimal);
-//    res.status(201).json(novoAnimal);
-//});
 
 app.post("/animais", async (req, res) => {
     const { nome, especie, idade, situacao } = req.body;
@@ -68,11 +49,47 @@ app.post("/animais", async (req, res) => {
     }
 });
 
-app.put("/animais/:id", (req, res) => {
-    const index = buscaAnimal(req.params.id);
-    Animal[index].situacao = req.body.situacao;
-    res.status(200).json(Animal);
-})
+app.post("/abrigos", async (req, res) => {
+    const { abrigoID, nome , endereco, avaliacao } = req.body;
+
+    try {
+        const novoAbrigo = await Abrigo.create({
+            abrigoID,
+            nome,
+            endereco: {
+                rua: req.body.endereco.rua,
+                bairro: req.body.endereco.bairro,
+                numero: req.body.endereco.numero,
+                complemento: req.body.endereco.complemento
+            },
+            avaliacao
+        });
+
+        res.status(201).json(novoAbrigo);
+    } catch (error) {
+        console.error("Erro ao salvar abrigo: ", error);
+        res.status(500).json({ erro: "Não foi possível salvar o abrigo." });
+    }
+});
+
+app.put("/animais/:id", async (req, res) => {
+    try {
+        const animalAtualizado = await Animal.findByIdAndUpdate(
+            req.params.id,
+            { situacao: req.body.situacao },
+            { new: true }
+        );
+
+        if (!animalAtualizado) {
+            return res.status(404).json({ erro: "Animal não encontrado." });
+        }
+
+        res.status(200).json(animalAtualizado);
+    } catch (error) {
+        console.error("Erro ao atualizar animal:", error);
+        res.status(500).json({ erro: "Não foi possível atualizar o animal." });
+    }
+});
 
 export default app;
 
