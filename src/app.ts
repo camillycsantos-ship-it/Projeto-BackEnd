@@ -1,9 +1,12 @@
 import express from "express";
+import type {Request, Response } from "express";
 import Animal from "./models/Animal.js";
 import Usuario from "./models/Usuario.js";
 import Abrigo from "./models/Abrigo.js";
 
+
 const app = express();
+
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -12,6 +15,10 @@ app.get("/", (req, res) => {
 
 app.get("/conta", (req, res) => {
     res.status(200).sendFile('conta.html', { root: 'public'});
+});
+
+app.get("/cadastro", (req, res) => {
+    res.status(200).sendFile('cadastro.html', { root: 'public'});
 });
 
 app.get("/login", (req, res) => {
@@ -72,7 +79,54 @@ app.post("/abrigos", async (req, res) => {
     }
 });
 
-app.put("/animais/:id", async (req, res) => {
+app.post("/cadastro", async (req, res) => {
+    const { nome, email, senha } = req.body;
+
+    try {
+        const usuario = await Usuario.create({
+            nome,
+            email,
+            senha
+        });
+
+        return res.status(201).json({
+            mensagem: "Usuário cadastrado com sucesso!",
+            usuario
+        });
+    } catch (error) {
+        console.error("Erro ao cadastrar usuário:", error);
+        return res.status(400).json({
+            mensagem: "Não foi possível cadastrar o usuário."
+        });
+    }
+});
+
+app.post("/login", async (req: Request, res: Response) => {
+    const { email, senha } = req.body;
+
+try {
+    const usuario = await Usuario.findOne({ email });
+
+    if (!usuario) {
+        return res.status(404).json({ mensagem: "Usuário não encontrado." });
+    }
+
+    if (usuario.senha !== senha) {
+        return res.status(401).json({ mensagem: "Senha incorreta." });
+    }
+
+    return res.status(200).json({
+        mensagem: "Login realizado com sucesso!",
+        usuario
+    });
+} catch (error) {
+    return res.status(500).json({
+        mensagem: "Erro ao fazer login."
+    });
+}
+});
+
+app.put("/animais/:id", async (req: Request, res: Response) => {
     try {
         const animalAtualizado = await Animal.findByIdAndUpdate(
             req.params.id,
@@ -84,12 +138,23 @@ app.put("/animais/:id", async (req, res) => {
             return res.status(404).json({ erro: "Animal não encontrado." });
         }
 
-        res.status(200).json(animalAtualizado);
+        return res.status(200).json(animalAtualizado);
     } catch (error) {
         console.error("Erro ao atualizar animal:", error);
-        res.status(500).json({ erro: "Não foi possível atualizar o animal." });
+        return res.status(500).json({ erro: "Não foi possível atualizar o animal." });
     }
 });
 
-export default app;
+//app.delete("/animais/:id", (req: Request, res: Response) => {
+//    const index = buscaAnimal(req.params.id);
+//
+//    if(index === -1){
+//        res.status(404).json({mensagem:"Animal não encontrado"})
+//        return;
+//    }
+//
+//    animais.splice(index,1);
+//    res.status(200).json({mensagem:"Animal deletado com sucesso!"});
+//});
 
+export default app;
