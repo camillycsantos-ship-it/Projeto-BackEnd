@@ -1,13 +1,32 @@
+import mongoose from "mongoose";
 import express from "express";
+import session from "express-session";
 import type {Request, Response } from "express";
 import Animal from "./models/Animal.js";
 import Usuario from "./models/Usuario.js";
 import Abrigo from "./models/Abrigo.js";
 
+declare module "express-session" {
+    interface SessionData {
+        userId?: string;
+    }
+}
+
 
 const app = express();
 
 app.use(express.json());
+app.use(session({
+    secret: process.env.SESSION_SECRET || "dev-session-secret-change-before-deploy",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 24 * 60 * 60 * 1000
+    }
+}));
 
 app.get("/", (req, res) => {
     res.status(200).sendFile('index.html', { root: 'public'});
@@ -15,6 +34,14 @@ app.get("/", (req, res) => {
 
 app.get("/conta", (req, res) => {
     res.status(200).sendFile('conta.html', { root: 'public'});
+});
+
+app.get("/minha-conta", (req, res) => {
+    if (!req.session.userId) {
+        return res.redirect("/login");
+    }
+
+    return res.sendFile("minha-conta.html", { root: "public" });
 });
 
 app.get("/cadastro", (req, res) => {
@@ -33,6 +60,7 @@ app.get("/animais", async (req, res) => {
     const animais = await Animal.find();
     res.status(200).json(animais);
 });
+
 
 app.get("/contact", (req, res) => {
     res.status(200).sendFile('contact.html', { root: 'public'});
@@ -101,6 +129,7 @@ app.post("/cadastro", async (req, res) => {
     }
 });
 
+
 app.post("/login", async (req: Request, res: Response) => {
     const { email, senha } = req.body;
 
@@ -115,9 +144,14 @@ try {
         return res.status(401).json({ mensagem: "Senha incorreta." });
     }
 
+    req.session.userId = usuario._id.toString();
+
     return res.status(200).json({
         mensagem: "Login realizado com sucesso!",
-        usuario
+        usuario: {
+            nome: usuario.nome,
+            email: usuario.email
+        }
     });
 } catch (error) {
     return res.status(500).json({
@@ -126,7 +160,100 @@ try {
 }
 });
 
-app.put("/animais/:id", async (req: Request, res: Response) => {
+app.post("/logout", (req: Request, res: Response) => {
+    req.session.destroy((error) => {
+        if (error) {
+            return res.status(500).json({ mensagem: "Não foi possível sair da conta." });
+        }
+
+        res.clearCookie("connect.sid");
+        return res.status(200).json({ mensagem: "Sessão encerrada." });
+    });
+});
+
+app.get("/api/minha-conta", async (req: Request, res: Response) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ mensagem: "Faça login para acessar sua conta." });
+    }
+
+    try {
+        const usuario = await Usuario.findById(req.session.userId);
+
+        if (!usuario) {
+            return res.status(401).json({ mensagem: "Usuário não encontrado." });
+        }
+
+        const animais = await Animal.find({
+            _id: { $in: usuario.adocoes.map((adocao) => adocao.animal) }
+        }).select("nome especie idade situacao").lean();
+
+        const adocoes = usuario.adocoes.flatMap((adocao) => {
+            const animal = animais.find((item) => item._id.toString() === adocao.animal.toString());
+
+            if (!animal) {
+                return [];
+            }
+
+            return [{
+                status: animal.situacao === "Adotado" ? "Adotado" : adocao.status,
+                animal: {
+                    nome: animal.nome,
+                    especie: animal.especie,
+                    idade: animal.idade
+                }
+            }];
+        });
+
+        return res.status(200).json({ nome: usuario.nome, adocoes });
+    } catch (error) {
+        console.error("Erro ao carregar conta:", error);
+        return res.status(500).json({ mensagem: "Não foi possível carregar sua conta." });
+    }
+});
+
+app.post("/api/adocoes", async (req: Request, res: Response) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ mensagem: "Faça login para demonstrar interesse." });
+    }
+
+    const { animalId } = req.body;
+
+    if (typeof animalId !== "string" || !mongoose.Types.ObjectId.isValid(animalId)) {
+        return res.status(400).json({ mensagem: "Animal informado é inválido." });
+    }
+
+    try {
+        const usuario = await Usuario.findById(req.session.userId);
+
+        if (!usuario) {
+            return res.status(401).json({ mensagem: "Usuário não encontrado." });
+        }
+
+        if (usuario.adocoes.some((adocao) => adocao.animal.toString() === animalId)) {
+            return res.status(409).json({ mensagem: "Você já demonstrou interesse neste animal." });
+        }
+
+        const animal = await Animal.findOneAndUpdate(
+            { _id: animalId, situacao: "Disponivel" },
+            { situacao: "Em processo" },
+            { new: true }
+        );
+
+        if (!animal) {
+            return res.status(409).json({ mensagem: "Este animal não está mais disponível." });
+        }
+
+        usuario.adocoes.push({ animal: animal._id, status: "Em processo" });
+        await usuario.save();
+
+        return res.status(201).json({ mensagem: "Interesse registrado. A adoção está em processo." });
+    } catch (error) {
+        console.error("Erro ao registrar adoção:", error);
+        return res.status(500).json({ mensagem: "Não foi possível registrar seu interesse." });
+    }
+});
+
+app.put("/animais/:id", async (req: Request<{ id: number }>, res: Response) => {
     try {
         const animalAtualizado = await Animal.findByIdAndUpdate(
             req.params.id,
@@ -145,16 +272,28 @@ app.put("/animais/:id", async (req: Request, res: Response) => {
     }
 });
 
-//app.delete("/animais/:id", (req: Request, res: Response) => {
-//    const index = buscaAnimal(req.params.id);
-//
-//    if(index === -1){
-//        res.status(404).json({mensagem:"Animal não encontrado"})
-//        return;
-//    }
-//
-//    animais.splice(index,1);
-//    res.status(200).json({mensagem:"Animal deletado com sucesso!"});
-//});
+app.delete("/animais/:id", async (req: Request<{ id: string }>, res: Response) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ erro: "ID informado possui formato inválido." });
+    }
+
+    try {
+        const animalRemovido = await Animal.findByIdAndDelete(id);
+
+        if (!animalRemovido) {
+            return res.status(404).json({ erro: "Animal não encontrado." });
+        }
+
+        return res.status(200).json({
+            mensagem: "Animal deletado com sucesso.",
+            animal: animalRemovido
+        });
+    } catch (error) {
+        console.error("Erro ao deletar animal:", error);
+        return res.status(500).json({ erro: "Não foi possível deletar o animal." });
+    }
+});
 
 export default app;

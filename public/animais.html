@@ -12,6 +12,7 @@
         <nav aria-label="Navegação principal">
             <a href="/" aria-current="page">Início</a>
             <a href="/conta">Cadastro</a>
+            <a href="/minha-conta">Minha conta</a>
             <a href="/animais">Animais</a>
             <a href="/abrigos">Abrigos</a>
             <a href="/contact">Contato</a>
@@ -20,12 +21,13 @@
 
     <main class="content page-content">
         <h1>Animais disponíveis para adoção</h1>
-        <p>A lista de animais será exibida aqui em breve.</p>
-        <a class="button" href="/">Voltar ao início</a>
+        <p id="mensagem-animais" class="registration-message" aria-live="polite"></p>
+        <ul class="animal-list" id="lista-animais"></ul>
     </main>
 
     <footer class="site-footer">
         <p>AdotaPET — Adoção responsável transforma vidas.</p>
     </footer>
+    <script src="/animais.js"></script>
 </body>
 </html>

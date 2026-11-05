@@ -2,6 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 export interface Animal {
 
+    id: number
     nome: string;
     especie: string;
     idade: number;
@@ -9,6 +10,13 @@ export interface Animal {
 }
 
 const animalSchema = new mongoose.Schema({
+
+    id: {
+        type: Number,
+        required: true,
+        min: 0
+    },
+
     nome: {
     type: String,
     required: true,

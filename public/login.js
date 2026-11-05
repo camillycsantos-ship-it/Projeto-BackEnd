@@ -1,25 +1,30 @@
 const form = document.getElementById("formLogin");
+const mensagem = document.getElementById("mensagem");
 
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-const email = document.getElementById("email").value.trim();
-const senha = document.getElementById("senha").value;
+    const email = document.getElementById("email").value.trim();
+    const senha = document.getElementById("senha").value;
 
-const resposta = await fetch("/login", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ email, senha })
-});
+    try {
+        const resposta = await fetch("/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email, senha })
+        });
 
-const dados = await resposta.json();
+        const dados = await resposta.json();
 
-if (!resposta.ok) {
-    alert(dados.mensagem || "Erro ao fazer login");
-    return;
-}
+        if (!resposta.ok) {
+            throw new Error(dados.mensagem || "Erro ao fazer login.");
+        }
 
-    alert(dados.mensagem);
+        window.location.href = "/minha-conta";
+    } catch (erro) {
+        mensagem.textContent = erro.message || "Não foi possível entrar. Tente novamente.";
+        mensagem.dataset.status = "error";
+    }
 });

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha conta - AdotaPET</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="/">AdotaPET</a>
+        <nav aria-label="Navegação principal">
+            <a href="/" aria-current="page">Início</a>
+            <a href="/conta">Cadastro</a>
+            <a href="/minha-conta">Minha conta</a>
+            <a href="/animais">Animais</a>
+            <a href="/abrigos">Abrigos</a>
+            <a href="/contact">Contato</a>
+        </nav>
+    </header>
+
+    <main class="account-page">
+        <div class="account-content">
+            <div class="account-heading">
+                <div>
+                    <p class="eyebrow">Seu espaço AdotaPET</p>
+                    <h1>Olá, <span id="nome-usuario">...</span></h1>
+                    <p>Acompanhe seus processos de adoção.</p>
+                </div>
+                <button class="button-secondary" id="botao-sair" type="button">Sair da conta</button>
+            </div>
+
+            <section class="account-panel" aria-labelledby="adocoes-titulo">
+                <h2 id="adocoes-titulo">Minhas adoções</h2>
+                <p id="mensagem-conta" class="registration-message" aria-live="polite">Carregando...</p>
+                <ul class="animal-list" id="lista-adocoes"></ul>
+            </section>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <p>AdotaPET — Adoção responsável transforma vidas.</p>
+    </footer>
+    <script src="/minha-conta.js"></script>
+</body>
+</html>
