@@ -1,21 +1,26 @@
-import express from 'express';
 import app from './src/app.js';
-import mongoose from "mongoose";
 import 'dotenv/config';
+import conectaNaDatabase from './src/config/dbConnect.js';
 
 const port = 8080
-const mongoURI = process.env.MONGODB_URI;
 
-if (!mongoURI) {
-    throw new Error("A variável MONGODB_URI não está configurada.");
+async function inicializarServidor(){
+
+    try{
+        const conexao = await conectaNaDatabase();
+
+    console.log("Conexão com o Banco de Dados realizada com sucesso!");
+
+    conexao.on("error", (erro) => {
+    console.error("Erro ao conectar com Banco de Dados: ", erro);
+    });
+
+    app.listen(port, () => {
+    console.log('Executando o servidor...')
+    });
+} catch (erro) {
+    console.error("Falha ao inicializar o servidor ou Banco de Dados: ", erro);
+}
 }
 
-mongoose.connect(mongoURI)
-    .then(() => console.log('Conectado ao MongoDB Atlas!'))
-    .catch((error) => console.error('Erro ao conectar:', error));
-
-app.use(express.static('public'));
-
-app.listen(port, () => {
-    console.log('Executando o servidor...')
-});
+inicializarServidor();

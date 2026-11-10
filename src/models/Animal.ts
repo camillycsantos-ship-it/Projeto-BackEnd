@@ -1,21 +1,15 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
-export interface Animal {
+export interface Animal extends Document {
 
-    id: number
     nome: string;
     especie: string;
     idade: number;
     situacao: string;
+
 }
 
 const animalSchema = new mongoose.Schema({
-
-    id: {
-        type: Number,
-        required: true,
-        min: 0
-    },
 
     nome: {
     type: String,
