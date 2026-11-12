@@ -1,47 +1,81 @@
+const API_URL = "/api/animais";
 const listaAnimais = document.getElementById("lista-animais");
 const mensagemAnimais = document.getElementById("mensagem-animais");
+const botoesFiltro = document.querySelectorAll(".filtros button");
+let animaisCarregados = [];
+let filtroAtual = "Todos";
+
+botoesFiltro.forEach((botao) => {
+    botao.addEventListener("click", () => {
+        filtroAtual = botao.dataset.filtro;
+
+        botoesFiltro.forEach((outroBotao) => {
+            const selecionado = outroBotao === botao;
+            outroBotao.classList.toggle("ativo", selecionado);
+            outroBotao.setAttribute("aria-pressed", String(selecionado));
+        });
+
+        renderizarAnimais();
+    });
+});
 
 async function carregarAnimais() {
     try {
-        const resposta = await fetch("/animais");
-        const animais = await resposta.json();
-        listaAnimais.replaceChildren();
-
-        if (animais.length === 0) {
-            mensagemAnimais.textContent = "Ainda não há animais cadastrados.";
-            return;
+        const resposta = await fetch(API_URL);
+        if (!resposta.ok) {
+            throw new Error("Não foi possível carregar os animais.");
         }
-
-        mensagemAnimais.textContent = "";
-
-        for (const animal of animais) {
-            const item = document.createElement("li");
-            item.className = "animal-item";
-
-            const detalhes = document.createElement("div");
-            const nome = document.createElement("h2");
-            nome.textContent = animal.nome;
-
-            const descricao = document.createElement("p");
-            descricao.textContent = `${animal.especie} · ${animal.idade} anos · ${animal.situacao}`;
-
-            detalhes.append(nome, descricao);
-            item.append(detalhes);
-
-            if (animal.situacao === "Disponivel") {
-                const botao = document.createElement("button");
-                botao.className = "button-secondary";
-                botao.type = "button";
-                botao.textContent = "Tenho interesse";
-                botao.addEventListener("click", () => demonstrarInteresse(animal._id, botao));
-                item.append(botao);
-            }
-
-            listaAnimais.append(item);
-        }
+        animaisCarregados = await resposta.json();
+        renderizarAnimais();
     } catch (erro) {
         mensagemAnimais.textContent = "Não foi possível carregar os animais.";
         mensagemAnimais.dataset.status = "error";
+    }
+}
+
+function renderizarAnimais() {
+    listaAnimais.replaceChildren();
+
+    if (animaisCarregados.length === 0) {
+        mensagemAnimais.textContent = "Ainda não há animais cadastrados.";
+        return;
+    }
+
+    const animaisFiltrados = filtroAtual === "Todos"
+        ? animaisCarregados
+        : animaisCarregados.filter((animal) => animal.situacao === filtroAtual);
+
+    if (animaisFiltrados.length === 0) {
+        mensagemAnimais.textContent = "Não há animais nesta categoria.";
+        return;
+    }
+
+    mensagemAnimais.textContent = "";
+
+    for (const animal of animaisFiltrados) {
+        const item = document.createElement("li");
+        item.className = "animal-item";
+
+        const detalhes = document.createElement("div");
+        const nome = document.createElement("h2");
+        nome.textContent = animal.nome;
+
+        const descricao = document.createElement("p");
+        descricao.textContent = `${animal.especie} · ${animal.idade} anos · ${animal.situacao}`;
+
+        detalhes.append(nome, descricao);
+        item.append(detalhes);
+
+        if (animal.situacao === "Disponivel") {
+            const botao = document.createElement("button");
+            botao.className = "button-secondary";
+            botao.type = "button";
+            botao.textContent = "Tenho interesse";
+            botao.addEventListener("click", () => demonstrarInteresse(animal._id, botao));
+            item.append(botao);
+        }
+
+        listaAnimais.append(item);
     }
 }
 

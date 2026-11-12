@@ -10,31 +10,26 @@
     <header class="site-header">
         <a class="brand" href="/">AdotaPET</a>
         <nav aria-label="Navegação principal">
-            <a href="/" aria-current="page">Início</a>
-            <a href="/conta">Cadastro</a>
-            <a href="/minha-conta">Minha conta</a>
+            <a href="/">Início</a>
+            <a href="/conta" data-nav-register>Cadastro</a>
+            <a href="/minha-conta" data-nav-account>Minha conta</a>
             <a href="/animais">Animais</a>
-            <a href="/abrigos">Abrigos</a>
+            <a href="/abrigos" aria-current="page">Abrigos</a>
             <a href="/contact">Contato</a>
         </nav>
     </header>
+
     <main class="content page-content">
-        <h1>Encontre um Abrigo perto de você!</h1>
-        <p>A lista de abrigos será exibida aqui em breve.</p>
+        <h1>Encontre um abrigo perto de você</h1>
+        <p id="mensagem-abrigos" class="registration-message" aria-live="polite">Carregando abrigos...</p>
+        <ul class="shelter-list" id="lista-abrigos"></ul>
         <a class="button" href="/">Voltar ao início</a>
     </main>
-</body>
-
-
-
-
-
-
-
-
-
-
 
     <footer class="site-footer">
         <p>AdotaPET — Adoção responsável transforma vidas.</p>
     </footer>
+    <script src="/abrigos.js"></script>
+    <script src="/navbar.js"></script>
+</body>
+</html>

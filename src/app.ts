@@ -17,6 +17,7 @@ const app = express();
 
 app.use(express.static("public"));
 app.use(express.json());
+app.set("json spaces", 2);
 app.use(session({
     secret: process.env.SESSION_SECRET || "dev-session-secret-change-before-deploy",
     resave: false,
@@ -29,15 +30,15 @@ app.use(session({
     }
 }));
 
-app.get("/", (req, res) => {
-    res.status(200).sendFile('index.html', { root: 'public'});
+app.get("/animais", (req: Request, res: Response) => {
+    res.status(200).sendFile('animais.html', { root: 'public'});
 });
 
-app.get("/conta", (req, res) => {
+app.get("/conta", (req: Request, res: Response) => {
     res.status(200).sendFile('conta.html', { root: 'public'});
 });
 
-app.get("/minha-conta", (req, res) => {
+app.get("/minha-conta", (req: Request, res: Response) => {
     if (!req.session.userId) {
         return res.redirect("/login");
     }
@@ -45,32 +46,51 @@ app.get("/minha-conta", (req, res) => {
     return res.sendFile("minha-conta.html", { root: "public" });
 });
 
-app.get("/cadastro", (req, res) => {
+app.get("/cadastro", (req: Request, res: Response) => {
     res.status(200).sendFile('cadastro.html', { root: 'public'});
 });
 
-app.get("/login", (req, res) => {
+app.get("/login", (req: Request, res: Response) => {
     res.status(200).sendFile('login.html', { root: 'public'});
 });
 
-app.get("/abrigos", (req, res) => {
+app.get("/abrigos", (req: Request, res: Response) => {
     res.status(200).sendFile('abrigos.html', { root: 'public'});
 });
-
-app.get("/animais", async (req, res) => {
-    const animais = await Animal.find();
-    res.status(200).json(animais);
-});
-
 
 app.get("/contact", (req, res) => {
     res.status(200).sendFile('contact.html', { root: 'public'});
 });
 
-app.post("/animais", async (req, res) => {
-    const { nome, especie, idade, situacao } = req.body;
-
+app.get("/api/abrigos", async (req: Request, res: Response) => {
     try {
+        const abrigos = await Abrigo.find().sort({ nome: 1 });
+        return res.status(200).json(abrigos);
+    } catch (error) {
+        console.error("Erro ao buscar abrigos:", error);
+        return res.status(500).json({ mensagem: "Não foi possível carregar os abrigos." });
+    }
+});
+
+app.get("/animais", (req: Request, res: Response) => {
+    return res.sendFile("animais.html", { root: "public" });
+});
+
+app.get("/api/animais", async (req: Request, res: Response) => {
+        try{
+        const animais = await Animal.find();
+        res.status(200).json(animais);
+        }catch(error){
+            res.status(500).json({ mensagem: "Erro ao buscar animal."});
+        }
+});
+
+app.post("/animais", async (req: Request, res: Response) => {
+    
+    try{
+
+        const { nome, especie, idade, situacao } = req.body;
+
         const novoAnimal = await Animal.create({
             nome,
             especie,
@@ -85,10 +105,11 @@ app.post("/animais", async (req, res) => {
     }
 });
 
-app.post("/abrigos", async (req, res) => {
-    const { abrigoID, nome , endereco, avaliacao } = req.body;
-
+app.post("/abrigos", async (req: Request, res: Response) => {
     try {
+
+        const { abrigoID, nome , endereco, avaliacao } = req.body;
+
         const novoAbrigo = await Abrigo.create({
             abrigoID,
             nome,
@@ -108,10 +129,12 @@ app.post("/abrigos", async (req, res) => {
     }
 });
 
-app.post("/cadastro", async (req, res) => {
-    const { nome, email, senha } = req.body;
+app.post("/cadastro", async (req: Request, res: Response) => {
 
     try {
+
+        const { nome, email, senha } = req.body;
+        
         const usuario = await Usuario.create({
             nome,
             email,
@@ -132,9 +155,11 @@ app.post("/cadastro", async (req, res) => {
 
 
 app.post("/login", async (req: Request, res: Response) => {
-    const { email, senha } = req.body;
 
 try {
+
+    const { email, senha } = req.body;
+
     const usuario = await Usuario.findOne({ email });
 
     if (!usuario) {
@@ -170,6 +195,25 @@ app.post("/logout", (req: Request, res: Response) => {
         res.clearCookie("connect.sid");
         return res.status(200).json({ mensagem: "Sessão encerrada." });
     });
+});
+
+app.get("/api/sessao", async (req: Request, res: Response) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ mensagem: "Sessão não autenticada." });
+    }
+
+    try {
+        const usuario = await Usuario.findById(req.session.userId).select("nome");
+
+        if (!usuario) {
+            return res.status(401).json({ mensagem: "Usuário não encontrado." });
+        }
+
+        return res.status(200).json({ nome: usuario.nome });
+    } catch (error) {
+        console.error("Erro ao verificar sessão:", error);
+        return res.status(500).json({ mensagem: "Não foi possível verificar a sessão." });
+    }
 });
 
 app.get("/api/minha-conta", async (req: Request, res: Response) => {
@@ -254,7 +298,7 @@ app.post("/api/adocoes", async (req: Request, res: Response) => {
     }
 });
 
-app.put("/animais/:id", async (req: Request<{ id: number }>, res: Response) => {
+app.put("/animais/:id", async (req: Request, res: Response) => {
     try {
         const animalAtualizado = await Animal.findByIdAndUpdate(
             req.params.id,

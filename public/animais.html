@@ -1,33 +1,38 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Animais disponíveis - AdotaPET</title>
-    <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adoção de Animais Exóticos</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <header class="site-header">
-        <a class="brand" href="/">AdotaPET</a>
-        <nav aria-label="Navegação principal">
-            <a href="/" aria-current="page">Início</a>
-            <a href="/conta">Cadastro</a>
-            <a href="/minha-conta">Minha conta</a>
-            <a href="/animais">Animais</a>
-            <a href="/abrigos">Abrigos</a>
-            <a href="/contact">Contato</a>
-        </nav>
-    </header>
+<body class="animals-page">
 
-    <main class="content page-content">
-        <h1>Animais disponíveis para adoção</h1>
-        <p id="mensagem-animais" class="registration-message" aria-live="polite"></p>
-        <ul class="animal-list" id="lista-animais"></ul>
-    </main>
+  <header class="site-header">
+    <a class="brand" href="/">AdotaPET</a>
+    <nav aria-label="Navegação principal">
+      <a href="/">Início</a>
+      <a href="/conta" data-nav-register>Cadastro</a>
+      <a href="/minha-conta" data-nav-account>Minha conta</a>
+      <a href="/animais" aria-current="page">Animais</a>
+      <a href="/abrigos">Abrigos</a>
+      <a href="/contact">Contato</a>
+    </nav>
+  </header>
 
-    <footer class="site-footer">
-        <p>AdotaPET — Adoção responsável transforma vidas.</p>
-    </footer>
-    <script src="/animais.js"></script>
+  <header class="animals-header">
+    <h1>🐾 Animais para Adoção</h1>
+    <div class="filtros">
+      <button class="ativo" type="button" data-filtro="Todos" aria-pressed="true">Todos</button>
+      <button type="button" data-filtro="Disponivel" aria-pressed="false">Disponíveis</button>
+      <button type="button" data-filtro="Adotado" aria-pressed="false">Adotados</button>
+    </div>
+  </header>
+
+  <p id="mensagem-animais" class="mensagem" aria-live="polite">Carregando animais...</p>
+  <main class="grid-animais" id="lista-animais"></main>
+
+  <script src="/animais.js"></script>
+  <script src="/navbar.js"></script>
 </body>
 </html>
