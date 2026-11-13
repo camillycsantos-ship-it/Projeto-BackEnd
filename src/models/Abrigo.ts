@@ -1,10 +1,6 @@
 import mongoose from "mongoose";
 
 const abrigoSchema = new mongoose.Schema({
-    abrigoID: {
-        type: Number,
-        required: true,
-    },
 
     nome: {
         type: String,

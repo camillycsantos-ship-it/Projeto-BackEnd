@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
-import express from "express";
+import express, { response } from "express";
 import session from "express-session";
 import type {Request, Response } from "express";
-import Animal from "./models/Animal.js";
+import Animal from  "./models/Animal.js";
+import type { Animal as AnimalDocument } from "./models/Animal.js";
 import Usuario from "./models/Usuario.js";
 import Abrigo from "./models/Abrigo.js";
 
@@ -29,10 +30,6 @@ app.use(session({
         maxAge: 24 * 60 * 60 * 1000
     }
 }));
-
-app.get("/animais", (req: Request, res: Response) => {
-    res.status(200).sendFile('animais.html', { root: 'public'});
-});
 
 app.get("/conta", (req: Request, res: Response) => {
     res.status(200).sendFile('conta.html', { root: 'public'});
@@ -108,10 +105,9 @@ app.post("/animais", async (req: Request, res: Response) => {
 app.post("/abrigos", async (req: Request, res: Response) => {
     try {
 
-        const { abrigoID, nome , endereco, avaliacao } = req.body;
+        const {nome , endereco, avaliacao } = req.body;
 
         const novoAbrigo = await Abrigo.create({
-            abrigoID,
             nome,
             endereco: {
                 rua: req.body.endereco.rua,
@@ -197,24 +193,6 @@ app.post("/logout", (req: Request, res: Response) => {
     });
 });
 
-app.get("/api/sessao", async (req: Request, res: Response) => {
-    if (!req.session.userId) {
-        return res.status(401).json({ mensagem: "Sessão não autenticada." });
-    }
-
-    try {
-        const usuario = await Usuario.findById(req.session.userId).select("nome");
-
-        if (!usuario) {
-            return res.status(401).json({ mensagem: "Usuário não encontrado." });
-        }
-
-        return res.status(200).json({ nome: usuario.nome });
-    } catch (error) {
-        console.error("Erro ao verificar sessão:", error);
-        return res.status(500).json({ mensagem: "Não foi possível verificar a sessão." });
-    }
-});
 
 app.get("/api/minha-conta", async (req: Request, res: Response) => {
     if (!req.session.userId) {
@@ -253,6 +231,27 @@ app.get("/api/minha-conta", async (req: Request, res: Response) => {
     } catch (error) {
         console.error("Erro ao carregar conta:", error);
         return res.status(500).json({ mensagem: "Não foi possível carregar sua conta." });
+    }
+});
+
+app.get("/api/usuarios/:id", async (req: Request<{id: string}>, res: Response) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ mensagem: "ID inválido." });
+    }
+
+    try {
+        const usuario = await Usuario.findById(id).select("nome email");
+
+        if (!usuario) {
+            return res.status(404).json({ mensagem: "Usuário não encontrado." });
+        }
+
+        return res.status(200).json(usuario);
+    } catch (error) {
+        console.error("Erro ao buscar usuário:", error);
+        return res.status(500).json({ mensagem: "Erro ao buscar usuário." });
     }
 });
 
@@ -298,7 +297,7 @@ app.post("/api/adocoes", async (req: Request, res: Response) => {
     }
 });
 
-app.put("/animais/:id", async (req: Request, res: Response) => {
+app.put("/api/animais/:id", async (req: Request, res: Response) => {
     try {
         const animalAtualizado = await Animal.findByIdAndUpdate(
             req.params.id,
@@ -317,7 +316,26 @@ app.put("/animais/:id", async (req: Request, res: Response) => {
     }
 });
 
-app.delete("/animais/:id", async (req: Request<{ id: string }>, res: Response) => {
+app.put("/api/abrigos/:id", async (req: Request, res: Response) => {
+    try {
+        const abrigoAtualizado = await Abrigo.findByIdAndUpdate(
+            req.params.id,
+            { avaliacao: req.body.avaliacao },
+            { new: true }
+        );
+
+        if (!abrigoAtualizado) {
+            return res.status(404).json({ erro: "Abrigo não encontrado." });
+        }
+
+        return res.status(200).json(abrigoAtualizado);
+    } catch (error) {
+        console.error("Erro ao atualizar abrigo:", error);
+        return res.status(500).json({ erro: "Não foi possível atualizar o abrigo." });
+    }
+});
+
+app.delete("/api/animais/:id", async (req: Request<{ id: string }>, res: Response) => {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -339,6 +357,78 @@ app.delete("/animais/:id", async (req: Request<{ id: string }>, res: Response) =
         console.error("Erro ao deletar animal:", error);
         return res.status(500).json({ erro: "Não foi possível deletar o animal." });
     }
+});
+
+app.delete("/abrigos/:id", async (req: Request<{ id: string }>, res: Response) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ erro: "ID informado possui formato inválido." });
+    }
+
+    try {
+        const abrigoRemovido = await Abrigo.findByIdAndDelete(id);
+
+        if (!abrigoRemovido) {
+            return res.status(404).json({ erro: "Abrigo não encontrado." });
+        }
+
+        return res.status(200).json({
+            mensagem: "Abrigo deletado com sucesso.",
+            abrigo: abrigoRemovido
+        });
+    } catch (error) {
+        console.error("Erro ao deletar abrigo:", error);
+        return res.status(500).json({ erro: "Não foi possível deletar o abrigo." });
+    }
+});
+
+app.delete("/minha-conta/:id", async (req: Request<{ id: string }>, res: Response) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ erro: "ID informado possui formato inválido." });
+    }
+
+    try {
+        const usuarioRemovido = await Usuario.findByIdAndDelete(id);
+
+        if (!usuarioRemovido) {
+            return res.status(404).json({ erro: "Usuario não encontrado." });
+        }
+
+        return res.status(200).json({
+            mensagem: "Usuario deletado com sucesso.",
+            usuario: usuarioRemovido
+        });
+    } catch (error) {
+        console.error("Erro ao deletar usuario:", error);
+        return res.status(500).json({ erro: "Não foi possível deletar o usuario." });
+    }
+});
+
+app.patch("/api/animais/:id", async (req: Request<{ id: string }>, res: Response) => {
+    try{
+        const { id } = req.params;
+
+        const animalAtualizado = await Animal.findByIdAndUpdate(
+            id,
+            {$set: req.body},
+            { new: true}
+);
+
+    if(!animalAtualizado){
+        res.status(404).json({mensagem: "Animal não encontrado!"});
+        return;
+    }
+
+    res.status(200).json({
+        mensagem: "Animal atualizado parcialmente com sucesso!",
+        animal: animalAtualizado,
+    });
+    }catch(error){
+    res.status(500).json({mensagem: "Erro ao atualizar parcialmente o livro."})
+}
 });
 
 export default app;
