@@ -1,6 +1,6 @@
 
 :root {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family:"Figtree", sans-serif;
     color: #292524;
     background: #fffaf5;
     font-synthesis: none;
@@ -130,7 +130,6 @@ a:focus-visible {
     display: grid;
     gap: 12px;
     padding-left: 24px;
-    font-family: "serif";
     font-size: 1.1rem;
 }
 
