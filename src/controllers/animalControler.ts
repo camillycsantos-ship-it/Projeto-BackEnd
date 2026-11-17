@@ -12,7 +12,7 @@ class AnimalController{
                 }
     }
 
-        static async buscarPorId (req: Request<{ id: string }>, res: Response) {
+    static async buscarPorId (req: Request<{ id: string }>, res: Response) {
             try{
                 const { id } = req.params;
                 const animalEncontrado = await Animal.findById(id);
@@ -26,6 +26,30 @@ class AnimalController{
                 res.status(500).json({mensagem: "Erro ao encontrar animal por id."});
             }
         }
+
+    static async buscaPorFiltro ( req: Request, res: Response) {
+        try{
+            const { animal, anos, disponibilidade } = req.query;
+            const filtro: Record<string, any> = {};
+
+            if(animal) {
+                filtro.especie = {$regex: String(animal), $options: "i"}
+            }
+            if(anos) {
+                filtro.idade = String(anos);
+            }
+            if(disponibilidade) {
+                filtro.situacao = String(disponibilidade);
+            }
+
+            const animaisFiltrados = await Animal.find(filtro);
+
+            res.status(200).json(animaisFiltrados);
+
+        }catch(error){
+            res.status(500).json({mensagem: "Erro ao encontrar animal por filtro."})
+        }
+}
 
     static async cadastrar (req: Request, res: Response) {
         try{
