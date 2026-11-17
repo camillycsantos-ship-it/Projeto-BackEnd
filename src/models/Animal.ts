@@ -32,7 +32,9 @@ const animalSchema = new mongoose.Schema({
     situacao: {
         type: String,
         default: "Disponivel"
-    }
+    },
+
+    cover: {type: String, default: "https://placehold.co/300x450?text=No+Cover"},
 
 });
 

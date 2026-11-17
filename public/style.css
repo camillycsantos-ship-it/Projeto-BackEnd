@@ -292,6 +292,96 @@ a:focus-visible {
     color: #665b57;
 }
 
+.account-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.profile-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin: -12px 0 32px;
+    padding: 24px;
+    border: 1px solid #e8dcd5;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.profile-form[hidden] {
+    display: none;
+}
+
+.profile-field {
+    display: grid;
+    gap: 7px;
+    color: #292524;
+    font-weight: 700;
+}
+
+.profile-field input {
+    width: 100%;
+    min-width: 0;
+    padding: 11px 12px;
+    border: 1px solid #d9cbc3;
+    border-radius: 6px;
+    background: #fff;
+    color: #292524;
+    font: inherit;
+}
+
+.profile-field input:focus-visible {
+    border-color: #8a3d32;
+    outline: 3px solid rgb(210 123 71 / 30%);
+    outline-offset: 2px;
+}
+
+.profile-form-actions {
+    display: flex;
+    grid-column: 1 / -1;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.profile-form-actions button {
+    padding: 10px 14px;
+    border: 1px solid #8a3d32;
+    border-radius: 6px;
+    background: #8a3d32;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.profile-form-actions button:hover {
+    background: #6f3028;
+}
+
+.profile-form-actions button:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.profile-form-actions button:focus-visible,
+.account-actions button:focus-visible {
+    outline: 3px solid rgb(210 123 71 / 45%);
+    outline-offset: 2px;
+}
+
+.profile-form-actions p {
+    min-height: 1.5em;
+    margin: 0;
+    color: #a12f26;
+    line-height: 1.5;
+}
+
+.profile-form-actions p[data-status="success"] {
+    color: #27613b;
+}
+
 .account-panel {
     padding: 28px;
     border-top: 3px solid #8a3d32;
@@ -559,6 +649,18 @@ a:focus-visible {
 
     .account-heading h1 {
         font-size: 2rem;
+    }
+
+    .profile-form {
+        grid-template-columns: 1fr;
+        margin-top: 0;
+        padding: 20px;
+    }
+
+    .profile-form-actions {
+        grid-column: auto;
+        align-items: flex-start;
+        flex-direction: column;
     }
 
     .account-panel {

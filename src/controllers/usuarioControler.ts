@@ -30,10 +30,28 @@ class UsuarioController{
                 }
             }];
         });
-        return res.status(200).json({ nome: usuario.nome, adocoes });
+        return res.status(200).json({ nome: usuario.nome, email: usuario.email, adocoes });
         }catch (error) {
             console.error("Erro ao carregar conta:", error);
             return res.status(500).json({ mensagem: "Não foi possível carregar sua conta." });
+        }
+    }
+
+    static async sessao (req: Request, res: Response) {
+        if (!req.session.userId) {
+            return res.status(401).json({ mensagem: "Nenhum usuário autenticado." });
+        }
+
+        try {
+            const usuario = await Usuario.findById(req.session.userId).select("nome");
+            if (!usuario) {
+                return res.status(401).json({ mensagem: "Usuário não encontrado." });
+            }
+
+            return res.status(200).json({ nome: usuario.nome });
+        } catch (error) {
+            console.error("Erro ao verificar sessão:", error);
+            return res.status(500).json({ mensagem: "Não foi possível verificar a sessão." });
         }
     }
 
@@ -142,6 +160,76 @@ class UsuarioController{
                 return res.status(500).json({ mensagem: "Não foi possível registrar seu interesse." });
         }
     }
+
+    static async atualizarPerfil (req: Request, res: Response) {
+        if (!req.session.userId) {
+            return res.status(401).json({ mensagem: "Faça login para atualizar sua conta." });
+        }
+
+        const { nome, email } = req.body;
+        if (
+            typeof nome !== "string" || !nome.trim() ||
+            typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+        ) {
+            return res.status(400).json({ mensagem: "Informe um nome e um e-mail válidos." });
+        }
+
+        try {
+            const usuario = await Usuario.findByIdAndUpdate(
+                req.session.userId,
+                { $set: { nome: nome.trim(), email: email.trim().toLowerCase() } },
+                { new: true, runValidators: true }
+            ).select("nome email");
+
+            if (!usuario) {
+                return res.status(404).json({ mensagem: "Usuário não encontrado." });
+            }
+
+            return res.status(200).json({
+                mensagem: "Perfil atualizado com sucesso.",
+                usuario
+            });
+        } catch (error) {
+            if (typeof error === "object" && error !== null && "code" in error && error.code === 11000) {
+                return res.status(409).json({ mensagem: "Este e-mail já está cadastrado." });
+            }
+
+            console.error("Erro ao atualizar perfil:", error);
+            return res.status(500).json({ mensagem: "Não foi possível atualizar o perfil." });
+        }
+    }
+
+    static async atualizarEmail (req: Request<{ id: string }>, res: Response) {
+        const { id } = req.params;
+        const email = req.body.email;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ mensagem: "ID inválido." });
+    }
+
+        if (typeof email !== "string" || !email.trim()) {
+            return res.status(400).json({ mensagem: "Informe um e-mail válido." });
+    }
+
+        try {
+            const usuario = await Usuario.findByIdAndUpdate(
+                id,
+                { $set: { email: email.trim() } },
+                { new: true, runValidators: true }
+        ).select("nome email");
+
+        if (!usuario) {
+            return res.status(404).json({ mensagem: "Usuário não encontrado." });
+        }
+
+        return res.status(200).json({
+            mensagem: "E-mail atualizado com sucesso.",
+            usuario
+        });
+        }catch (error) {
+            return res.status(500).json({ mensagem: "Não foi possível atualizar o e-mail." });
+    }
+}
 
     static async deletarUsuario (req: Request<{ id: string }>, res: Response) {
         const { id } = req.params;

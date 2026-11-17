@@ -51,6 +51,24 @@ class AbrigoController{
     }
 
     static async atualizarParcialmente (req: Request<{ id: string }>, res: Response) {
+        try{
+                    const { id } = req.params;
+                    const abrigoAtualizado = await Abrigo.findByIdAndUpdate(
+                        id,
+                        {$set: req.body},
+                        { new: true}
+                    );
+                if(!abrigoAtualizado){
+                    res.status(404).json({mensagem: "Abrigo não encontrado!"});
+                    return;
+                }
+                    res.status(200).json({
+                        mensagem: "Abrigo atualizado parcialmente com sucesso!",
+                        abrigo: abrigoAtualizado,
+            });
+                }catch(error){
+                    res.status(500).json({mensagem: "Erro ao atualizar parcialmente o abrigo."})
+                }
     }
 
     static async deletar (req: Request<{ id: string }>, res: Response) {

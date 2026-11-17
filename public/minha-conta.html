@@ -17,8 +17,7 @@
             <a href="/abrigos">Abrigos</a>
             <a href="/contact">Contato</a>
         </nav>
-    </header>
-
+</header>
     <main class="account-page">
         <div class="account-content">
             <div class="account-heading">
@@ -27,8 +26,28 @@
                     <h1>Olá, <span id="nome-usuario">...</span></h1>
                     <p>Acompanhe seus processos de adoção.</p>
                 </div>
-                <button class="button-secondary" id="botao-sair" type="button">Sair da conta</button>
+                <div class="account-actions">
+                    <button class="button-secondary" id="botao-editar-perfil" type="button" aria-expanded="false" aria-controls="formulario-perfil">Editar perfil</button>
+                    <button class="button-secondary" id="botao-sair" type="button">Sair da conta</button>
+                </div>
             </div>
+
+            <form class="profile-form" id="formulario-perfil" hidden>
+                <div class="profile-field">
+                    <label for="perfil-nome">Nome</label>
+                    <input id="perfil-nome" name="nome" type="text" required>
+                </div>
+
+                <div class="profile-field">
+                    <label for="perfil-email">E-mail</label>
+                    <input id="perfil-email" name="email" type="email" required>
+                </div>
+
+                <div class="profile-form-actions">
+                    <button type="submit">Salvar alterações</button>
+                    <p id="mensagem-perfil" aria-live="polite"></p>
+                </div>
+            </form>
 
             <section class="account-panel" aria-labelledby="adocoes-titulo">
                 <h2 id="adocoes-titulo">Minhas adoções</h2>

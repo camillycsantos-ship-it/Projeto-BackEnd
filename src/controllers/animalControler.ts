@@ -14,11 +14,12 @@ class AnimalController{
 
     static async cadastrar (req: Request, res: Response) {
         try{
-        const { nome, especie, idade, situacao } = req.body;
+        const { nome, especie, idade, situacao, cover } = req.body;
         const novoAnimal = await Animal.create({
             nome,
             especie,
             idade,
+            cover,
             situacao: situacao || "Disponivel"
         });
         res.status(201).json(novoAnimal);
@@ -62,7 +63,7 @@ class AnimalController{
                 animal: animalAtualizado,
     });
         }catch(error){
-            res.status(500).json({mensagem: "Erro ao atualizar parcialmente o livro."})
+            res.status(500).json({mensagem: "Erro ao atualizar parcialmente o animal."})
         }
     }
 
