@@ -1,6 +1,7 @@
 const API_URL = "/api/animais";
 const listaAnimais = document.getElementById("lista-animais");
 const mensagemAnimais = document.getElementById("mensagem-animais");
+const buscaAnimais = document.getElementById("busca-animais");
 const botoesFiltro = document.querySelectorAll(".filtros button");
 let animaisCarregados = [];
 let filtroAtual = "Todos";
@@ -18,6 +19,8 @@ botoesFiltro.forEach((botao) => {
         renderizarAnimais();
     });
 });
+
+buscaAnimais.addEventListener("input", renderizarAnimais);
 
 async function carregarAnimais() {
     try {
@@ -41,12 +44,17 @@ function renderizarAnimais() {
         return;
     }
 
-    const animaisFiltrados = filtroAtual === "Todos"
-        ? animaisCarregados
-        : animaisCarregados.filter((animal) => animal.situacao === filtroAtual);
+    const termoBusca = normalizarTexto(buscaAnimais.value.trim());
+    const animaisFiltrados = animaisCarregados.filter((animal) => {
+        const correspondeFiltro = filtroAtual === "Todos" || animal.situacao === filtroAtual;
+        const textoAnimal = normalizarTexto(`${animal.nome} ${animal.especie}`);
+        return correspondeFiltro && textoAnimal.includes(termoBusca);
+    });
 
     if (animaisFiltrados.length === 0) {
-        mensagemAnimais.textContent = "Não há animais nesta categoria.";
+        mensagemAnimais.textContent = termoBusca
+            ? "Nenhum animal encontrado para essa busca."
+            : "Não há animais nesta categoria.";
         return;
     }
 
@@ -77,6 +85,10 @@ function renderizarAnimais() {
 
         listaAnimais.append(item);
     }
+}
+
+function normalizarTexto(texto) {
+    return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
 }
 
 async function demonstrarInteresse(animalId, botao) {

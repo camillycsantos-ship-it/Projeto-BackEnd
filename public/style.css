@@ -35,7 +35,7 @@ a {
 .brand {
     color: #8a3d32;
     font-size: 1.4rem;
-    font-weight: 700;
+    font-weight: 400;
     text-decoration: none;
 }
 
@@ -77,7 +77,7 @@ nav a[aria-current="page"] {
 .eyebrow {
     color: #8a3d32;
     font-size: 0.9rem;
-    font-weight: 700;
+    font-weight: 400;
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
@@ -105,7 +105,7 @@ h2 {
     background: #8a3d32;
     color: #fff;
     font: inherit;
-    font-weight: 700;
+    font-weight: 400;
     text-decoration: none;
     cursor: pointer;
 }
@@ -201,7 +201,7 @@ a:focus-visible {
 }
 
 .form-field label {
-    font-weight: 700;
+    font-weight: 400;
 }
 
 .form-field input {
@@ -253,7 +253,7 @@ a:focus-visible {
 
 .login-register-link a {
     color: #8a3d32;
-    font-weight: 700;
+    font-weight: 400;
     text-underline-offset: 3px;
 }
 
@@ -317,7 +317,7 @@ a:focus-visible {
     display: grid;
     gap: 7px;
     color: #292524;
-    font-weight: 700;
+    font-weight: 400;
 }
 
 .profile-field input {
@@ -352,7 +352,7 @@ a:focus-visible {
     background: #8a3d32;
     color: #fff;
     font: inherit;
-    font-weight: 700;
+    font-weight: 400;
     cursor: pointer;
 }
 
@@ -424,7 +424,7 @@ a:focus-visible {
     display: inline-block;
     margin-top: 10px;
     color: #6f3028;
-    font-weight: 700;
+    font-weight: 400;
 }
 
 .button-secondary {
@@ -435,7 +435,7 @@ a:focus-visible {
     background: #fff;
     color: #8a3d32;
     font: inherit;
-    font-weight: 700;
+    font-weight: 400;
     cursor: pointer;
 }
 
@@ -463,6 +463,37 @@ a:focus-visible {
     border-bottom: 1px solid #f0e2d9;
 }
 
+.animals-controls {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.animals-search {
+    display: grid;
+    gap: 6px;
+    color: #665b57;
+    font-size: 0.875rem;
+    font-weight: 400;
+}
+
+.animals-search input {
+    width: min(250px, 30vw);
+    min-height: 48px;
+    padding: 10px 14px;
+    border: 1px solid #d9c8bf;
+    border-radius: 8px;
+    background: #fffaf5;
+    color: #332b28;
+    font: inherit;
+}
+
+.animals-search input:focus-visible {
+    outline: 3px solid #d27b47;
+    outline-offset: 2px;
+}
+
 .animals-page h1 {
     margin: 0;
     color: #8a3d32;
@@ -470,8 +501,8 @@ a:focus-visible {
 }
 
 .filtros {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
     padding: 5px;
     border: 1px solid #f0e2d9;
@@ -480,6 +511,7 @@ a:focus-visible {
 }
 
 .filtros button {
+    min-width: 0;
     min-height: 40px;
     padding: 8px 14px;
     border: 0;
@@ -487,7 +519,8 @@ a:focus-visible {
     background: transparent;
     color: #665b57;
     font: inherit;
-    font-weight: 700;
+    font-weight: 400;
+    white-space: nowrap;
     cursor: pointer;
 }
 
@@ -532,8 +565,9 @@ a:focus-visible {
     display: flex;
     min-width: 0;
     min-height: 220px;
+    height: 100%;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     justify-content: space-between;
     gap: 24px;
     overflow: hidden;
@@ -617,7 +651,7 @@ a:focus-visible {
 
 .shelter-card .shelter-rating {
     color: #6f3028;
-    font-weight: 700;
+    font-weight: 400;
 }
 
 /* Ajustes para telas menores */
@@ -673,6 +707,20 @@ a:focus-visible {
         padding: 36px 24px 24px;
     }
 
+    .animals-controls {
+        width: 100%;
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .animals-search input {
+        width: 100%;
+    }
+
+    .filtros {
+        width: fit-content;
+    }
+
     .animals-page h1 {
         font-size: 2rem;
     }
@@ -686,5 +734,46 @@ a:focus-visible {
 @media (min-width: 601px) and (max-width: 900px) {
     .grid-animais {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 421px) and (max-width: 600px) {
+    .animals-controls {
+        align-items: flex-end;
+        flex-direction: row;
+    }
+
+    .animals-search {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+
+    .animals-search input {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .filtros {
+        flex: 0 0 auto;
+        gap: 4px;
+        padding: 3px;
+    }
+
+    .filtros button {
+        padding-right: 8px;
+        padding-left: 8px;
+    }
+}
+
+@media (max-width: 420px) {
+    .animals-page .filtros {
+        width: 100%;
+        gap: 4px;
+        padding: 3px;
+    }
+
+    .animals-page .filtros button {
+        padding: 8px 4px;
+        font-size: 0.75rem;
     }
 }

@@ -6,12 +6,12 @@ import Animal from "../models/Animal.js";
 class UsuarioController{
     static async listarConta (req: Request, res: Response) {
         if (!req.session.userId) {
-            return res.status(401).json({ mensagem: "Faça login para acessar sua conta." });
+            return res.status(404).json({ mensagem: "Faça login para acessar sua conta." });
         }
         try {
             const usuario = await Usuario.findById(req.session.userId);
         if (!usuario) {
-            return res.status(401).json({ mensagem: "Usuário não encontrado." });
+            return res.status(404).json({ mensagem: "Usuário não encontrado." });
         }
             const animais = await Animal.find({
                 _id: { $in: usuario.adocoes.map((adocao) => adocao.animal) }
@@ -33,32 +33,32 @@ class UsuarioController{
         return res.status(200).json({ nome: usuario.nome, email: usuario.email, adocoes });
         }catch (error) {
             console.error("Erro ao carregar conta:", error);
-            return res.status(500).json({ mensagem: "Não foi possível carregar sua conta." });
+            return res.status(404).json({ mensagem: "Não foi possível carregar sua conta." });
         }
     }
 
     static async sessao (req: Request, res: Response) {
         if (!req.session.userId) {
-            return res.status(401).json({ mensagem: "Nenhum usuário autenticado." });
+            return res.status(404).json({ mensagem: "Nenhum usuário autenticado." });
         }
 
         try {
             const usuario = await Usuario.findById(req.session.userId).select("nome");
             if (!usuario) {
-                return res.status(401).json({ mensagem: "Usuário não encontrado." });
+                return res.status(404).json({ mensagem: "Usuário não encontrado." });
             }
 
             return res.status(200).json({ nome: usuario.nome });
         } catch (error) {
             console.error("Erro ao verificar sessão:", error);
-            return res.status(500).json({ mensagem: "Não foi possível verificar a sessão." });
+            return res.status(404).json({ mensagem: "Não foi possível verificar a sessão." });
         }
     }
 
     static async buscarConta (req: Request<{id: string}>, res: Response) {
             const { id } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-                return res.status(400).json({ mensagem: "ID inválido." });
+        if (!mongoose.isValidObjectId(id)) {
+                return res.status(404).json({ mensagem: "ID inválido." });
             }
         try {
             const usuario = await Usuario.findById(id).select("nome email");
@@ -68,7 +68,7 @@ class UsuarioController{
             return res.status(200).json(usuario);
         }catch (error) {
             console.error("Erro ao buscar usuário:", error);
-            return res.status(500).json({ mensagem: "Erro ao buscar usuário." });
+            return res.status(404).json({ mensagem: "Erro ao buscar usuário." });
         }
     }
 
@@ -80,13 +80,13 @@ class UsuarioController{
                 email,
                 senha
             });
-        return res.status(201).json({
+        return res.status(200).json({
             mensagem: "Usuário cadastrado com sucesso!",
             usuario
         });
         }catch(error){
             console.error("Erro ao cadastrar usuário:", error);
-            return res.status(400).json({
+            return res.status(404).json({
                 mensagem: "Não foi possível cadastrar o usuário."
             });
         }
@@ -100,7 +100,7 @@ class UsuarioController{
             return res.status(404).json({ mensagem: "Usuário não encontrado." });
         }
         if (usuario.senha !== senha) {
-            return res.status(401).json({ mensagem: "Senha incorreta." });
+            return res.status(404).json({ mensagem: "Senha incorreta." });
         }
             req.session.userId = usuario._id.toString();
             return res.status(200).json({
@@ -111,7 +111,7 @@ class UsuarioController{
                 }
             });
         }catch (error) {
-            return res.status(500).json({
+            return res.status(404).json({
                 mensagem: "Erro ao fazer login."
             });
         }
@@ -120,7 +120,7 @@ class UsuarioController{
     static async logout (req: Request, res: Response) {
         req.session.destroy((error) => {
         if (error) {
-            return res.status(500).json({ mensagem: "Não foi possível sair da conta." });
+            return res.status(404).json({ mensagem: "Não foi possível sair da conta." });
         }
             res.clearCookie("connect.sid");
             return res.status(200).json({ mensagem: "Sessão encerrada." });
@@ -129,19 +129,19 @@ class UsuarioController{
 
     static async adocaoUsuario (req: Request, res: Response) {
         if (!req.session.userId) {
-                return res.status(401).json({ mensagem: "Faça login para demonstrar interesse." });
+                return res.status(404).json({ mensagem: "Faça login para demonstrar interesse." });
             }
             const { animalId } = req.body;
-        if (typeof animalId !== "string" || !mongoose.Types.ObjectId.isValid(animalId)) {
-            return res.status(400).json({ mensagem: "Animal informado é inválido." });
+        if (typeof animalId !== "string" || !mongoose.isValidObjectId(animalId)) {
+            return res.status(404).json({ mensagem: "Animal informado é inválido." });
         }
         try {
             const usuario = await Usuario.findById(req.session.userId);
         if (!usuario) {
-            return res.status(401).json({ mensagem: "Usuário não encontrado." });
+            return res.status(404).json({ mensagem: "Usuário não encontrado." });
         }
         if (usuario.adocoes.some((adocao) => adocao.animal.toString() === animalId)) {
-            return res.status(409).json({ mensagem: "Você já demonstrou interesse neste animal." });
+            return res.status(404).json({ mensagem: "Você já demonstrou interesse neste animal." });
         }
         const animal = await Animal.findOneAndUpdate(
             { _id: animalId, situacao: "Disponivel" },
@@ -150,20 +150,20 @@ class UsuarioController{
         );
         
         if (!animal) {
-            return res.status(409).json({ mensagem: "Este animal não está mais disponível." });
+            return res.status(404).json({ mensagem: "Este animal não está mais disponível." });
         }
             usuario.adocoes.push({ animal: animal._id, status: "Em processo" });
                 await usuario.save();
-                return res.status(201).json({ mensagem: "Interesse registrado. A adoção está em processo." });
+                return res.status(200).json({ mensagem: "Interesse registrado. A adoção está em processo." });
         }catch (error) {
                 console.error("Erro ao registrar adoção:", error);
-                return res.status(500).json({ mensagem: "Não foi possível registrar seu interesse." });
+                return res.status(404).json({ mensagem: "Não foi possível registrar seu interesse." });
         }
     }
 
     static async atualizarPerfil (req: Request, res: Response) {
         if (!req.session.userId) {
-            return res.status(401).json({ mensagem: "Faça login para atualizar sua conta." });
+            return res.status(404).json({ mensagem: "Faça login para atualizar sua conta." });
         }
 
         const { nome, email } = req.body;
@@ -171,7 +171,7 @@ class UsuarioController{
             typeof nome !== "string" || !nome.trim() ||
             typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
         ) {
-            return res.status(400).json({ mensagem: "Informe um nome e um e-mail válidos." });
+            return res.status(404).json({ mensagem: "Informe um nome e um e-mail válidos." });
         }
 
         try {
@@ -191,11 +191,11 @@ class UsuarioController{
             });
         } catch (error) {
             if (typeof error === "object" && error !== null && "code" in error && error.code === 11000) {
-                return res.status(409).json({ mensagem: "Este e-mail já está cadastrado." });
+                return res.status(404).json({ mensagem: "Este e-mail já está cadastrado." });
             }
 
             console.error("Erro ao atualizar perfil:", error);
-            return res.status(500).json({ mensagem: "Não foi possível atualizar o perfil." });
+            return res.status(404).json({ mensagem: "Não foi possível atualizar o perfil." });
         }
     }
 
@@ -203,12 +203,12 @@ class UsuarioController{
         const { id } = req.params;
         const email = req.body.email;
 
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ mensagem: "ID inválido." });
+        if (!mongoose.isValidObjectId(id)) {
+            return res.status(404).json({ mensagem: "ID inválido." });
     }
 
         if (typeof email !== "string" || !email.trim()) {
-            return res.status(400).json({ mensagem: "Informe um e-mail válido." });
+            return res.status(404).json({ mensagem: "Informe um e-mail válido." });
     }
 
         try {
@@ -227,14 +227,14 @@ class UsuarioController{
             usuario
         });
         }catch (error) {
-            return res.status(500).json({ mensagem: "Não foi possível atualizar o e-mail." });
+            return res.status(404).json({ mensagem: "Não foi possível atualizar o e-mail." });
     }
 }
 
     static async deletarUsuario (req: Request<{ id: string }>, res: Response) {
         const { id } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ erro: "ID informado possui formato inválido." });
+        if (!mongoose.isValidObjectId(id)) {
+            return res.status(404).json({ erro: "ID informado possui formato inválido." });
     }
         try {
             const usuarioRemovido = await Usuario.findByIdAndDelete(id);
@@ -247,7 +247,7 @@ class UsuarioController{
         });
         }catch(error){
             console.error("Erro ao deletar usuario:", error);
-            return res.status(500).json({ erro: "Não foi possível deletar o usuario." });
+            return res.status(404).json({ erro: "Não foi possível deletar o usuario." });
         }
     }
 }

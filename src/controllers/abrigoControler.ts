@@ -9,7 +9,7 @@ class AbrigoController{
             return res.status(200).json(abrigos);
         }catch(error) {
             console.error("Erro ao buscar abrigos:", error);
-            return res.status(500).json({ mensagem: "Não foi possível carregar os abrigos." });
+            return res.status(404).json({ mensagem: "Não foi possível carregar os abrigos." });
         }
     }
 
@@ -26,10 +26,10 @@ class AbrigoController{
                 },
                     avaliacao
                 });
-                res.status(201).json(novoAbrigo);
+                res.status(200).json(novoAbrigo);
         }catch(error) {
             console.error("Erro ao salvar abrigo: ", error);
-            res.status(500).json({ erro: "Não foi possível salvar o abrigo." });
+            res.status(404).json({ erro: "Não foi possível salvar o abrigo." });
         }
     }
 
@@ -46,7 +46,7 @@ class AbrigoController{
             return res.status(200).json(abrigoAtualizado);
         }catch(error) {
             console.error("Erro ao atualizar abrigo:", error);
-            return res.status(500).json({ erro: "Não foi possível atualizar o abrigo." });
+            return res.status(404).json({ erro: "Não foi possível atualizar o abrigo." });
         }
     }
 
@@ -67,14 +67,14 @@ class AbrigoController{
                         abrigo: abrigoAtualizado,
             });
                 }catch(error){
-                    res.status(500).json({mensagem: "Erro ao atualizar parcialmente o abrigo."})
+                    res.status(404).json({mensagem: "Erro ao atualizar parcialmente o abrigo."})
                 }
     }
 
     static async deletar (req: Request<{ id: string }>, res: Response) {
         const { id } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ erro: "ID informado possui formato inválido." });
+        if (!mongoose.isValidObjectId(id)) {
+            return res.status(404).json({ erro: "ID informado possui formato inválido." });
         }
         try {
             const abrigoRemovido = await Abrigo.findByIdAndDelete(id);
@@ -87,7 +87,7 @@ class AbrigoController{
         });
     }catch(error) {
         console.error("Erro ao deletar abrigo:", error);
-        return res.status(500).json({ erro: "Não foi possível deletar o abrigo." });
+        return res.status(404).json({ erro: "Não foi possível deletar o abrigo." });
         }
     }
 }

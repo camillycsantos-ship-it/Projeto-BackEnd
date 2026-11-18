@@ -8,7 +8,7 @@ class AnimalController{
                 const animais = await Animal.find();
                 res.status(200).json(animais);
                 }catch(error){
-                    res.status(500).json({ mensagem: "Erro ao buscar animal."});
+                    res.status(404).json({ mensagem: "Erro ao buscar animal."});
                 }
     }
 
@@ -23,7 +23,7 @@ class AnimalController{
                 }
                 res.status(200).json(animalEncontrado);
             }catch(error){
-                res.status(500).json({mensagem: "Erro ao encontrar animal por id."});
+                res.status(404).json({mensagem: "Erro ao encontrar animal por id."});
             }
         }
 
@@ -47,7 +47,7 @@ class AnimalController{
             res.status(200).json(animaisFiltrados);
 
         }catch(error){
-            res.status(500).json({mensagem: "Erro ao encontrar animal por filtro."})
+            res.status(404).json({mensagem: "Erro ao encontrar animal por filtro."})
         }
 }
 
@@ -61,10 +61,10 @@ class AnimalController{
             cover,
             situacao: situacao || "Disponivel"
         });
-        res.status(201).json(novoAnimal);
+        res.status(200).json(novoAnimal);
     }catch (error) {
         console.error("Erro ao salvar animal:", error);
-        res.status(500).json({ erro: "Não foi possível salvar o animal." });
+        res.status(404).json({ erro: "Não foi possível salvar o animal." });
         }
     }
 
@@ -81,7 +81,7 @@ class AnimalController{
         return res.status(200).json(animalAtualizado);
         }catch (error) {
             console.error("Erro ao atualizar animal:", error);
-            return res.status(500).json({ erro: "Não foi possível atualizar o animal." });
+            return res.status(404).json({ erro: "Não foi possível atualizar o animal." });
     }
     }
 
@@ -102,14 +102,14 @@ class AnimalController{
                 animal: animalAtualizado,
     });
         }catch(error){
-            res.status(500).json({mensagem: "Erro ao atualizar parcialmente o animal."})
+            res.status(404).json({mensagem: "Erro ao atualizar parcialmente o animal."})
         }
     }
 
     static async deletar (req: Request<{ id: string }>, res: Response) {
         const { id } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ erro: "ID informado possui formato inválido." });
+        if (!mongoose.isValidObjectId(id)) {
+        return res.status(404).json({ erro: "ID informado possui formato inválido." });
     }
         try {
             const animalRemovido = await Animal.findByIdAndDelete(id);
@@ -122,7 +122,7 @@ class AnimalController{
         });
         }catch(error){
             console.error("Erro ao deletar animal:", error);
-            return res.status(500).json({ erro: "Não foi possível deletar o animal." });
+            return res.status(404).json({ erro: "Não foi possível deletar o animal." });
         }
     }
 }

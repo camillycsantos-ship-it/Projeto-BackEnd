@@ -22,10 +22,16 @@
 
   <header class="animals-header">
     <h1>🐾 Animais para Adoção</h1>
-    <div class="filtros">
-      <button class="ativo" type="button" data-filtro="Todos" aria-pressed="true">Todos</button>
-      <button type="button" data-filtro="Disponivel" aria-pressed="false">Disponíveis</button>
-      <button type="button" data-filtro="Adotado" aria-pressed="false">Adotados</button>
+    <div class="animals-controls">
+      <label class="animals-search">
+        <span>Buscar animais</span>
+        <input id="busca-animais" type="search" placeholder="Nome ou espécie" autocomplete="off">
+      </label>
+      <div class="filtros" aria-label="Filtrar por situação">
+        <button class="ativo" type="button" data-filtro="Todos" aria-pressed="true">Todos</button>
+        <button type="button" data-filtro="Disponivel" aria-pressed="false">Disponíveis</button>
+        <button type="button" data-filtro="Adotado" aria-pressed="false">Adotados</button>
+      </div>
     </div>
   </header>
 
