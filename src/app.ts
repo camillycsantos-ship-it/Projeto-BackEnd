@@ -4,6 +4,8 @@ import type {Request, Response } from "express";
 import usuarioRoutes from "./routes/usuarioRoutes.js";
 import animalRoutes from "./routes/animalRoutes.js";
 import abrigoRoutes from "./routes/abrigoRoutes.js";
+import { swaggerDocument } from "./docs/swagger.js";
+import swaggerUi from "swagger-ui-express";
 
 declare module "express-session" {
     interface SessionData {
@@ -31,6 +33,8 @@ app.use(session({
 app.use(usuarioRoutes);
 app.use(animalRoutes);
 app.use(abrigoRoutes);
+
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get("/", (req: Request, res: Response) => {
     res.status(200).sendFile('index.html', { root: 'public'});
