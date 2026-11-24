@@ -1,46 +1,100 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Adoção de Animais - AdotaPET</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Animais | Casa de Patas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap">
+<link rel="stylesheet" href="/css/style.css">
 </head>
-<body class="animals-page">
+<body>
+<header class="topo" id="topo"></header>
+<main>
+  <div class="secao-topo">
+    <div><h1>Animais</h1><p class="suave" id="contagem">Carregando…</p></div>
+    <button class="btn btn-rosa" type="button" id="abrir-novo">Cadastrar animal</button>
+  </div>
+  <form class="filtros" id="filtros" role="search">
+    <div class="campo"><label for="f-especie">Espécie</label><input id="f-especie" type="search" placeholder="Cachorro, gato…"></div>
+    <div class="campo"><label for="f-idade">Idade (anos)</label><input id="f-idade" type="number" min="0" placeholder="Qualquer"></div>
+    <div class="campo"><label for="f-situacao">Situação</label>
+      <select id="f-situacao"><option value="">Todas</option><option value="Disponivel">Disponível</option><option value="Em processo">Em processo</option><option value="Adotado">Adotado</option></select></div>
+    <button class="btn btn-borda" type="reset" id="limpar">Limpar filtros</button>
+  </form>
+  <div class="grade" id="lista" aria-live="polite"></div>
+  <div class="vazio" id="vazio" hidden><div class="arco sem-foto"></div><p id="vazio-msg" style="margin:0 auto">Nenhum animal encontrado. Ajuste os filtros ou cadastre um novo animal.</p></div>
 
-  <header class="site-header">
-    <a class="brand" href="/">AdotaPET</a>
-    <nav aria-label="Navegação principal">
-      <a href="/">Início</a>
-      <a href="/conta" data-nav-register>Cadastro</a>
-      <a href="/minha-conta" data-nav-account>Minha conta</a>
-      <a href="/animais" aria-current="page">Animais</a>
-      <a href="/abrigos">Abrigos</a>
-      <a href="/contact">Contato</a>
-    </nav>
-  </header>
-
-  <header class="animals-header">
-    <h1>🐾 Animais para Adoção</h1>
-    <div class="animals-controls">
-      <label class="animals-search">
-        <span>Buscar animais</span>
-        <input id="busca-animais" type="search" placeholder="Nome ou espécie" autocomplete="off">
-      </label>
-      <div class="filtros" aria-label="Filtrar por situação">
-        <button class="ativo" type="button" data-filtro="Todos" aria-pressed="true">Todos</button>
-        <button type="button" data-filtro="Disponivel" aria-pressed="false">Disponíveis</button>
-        <button type="button" data-filtro="Adotado" aria-pressed="false">Adotados</button>
+  <dialog id="dlg">
+    <form id="form-animal" method="dialog">
+      <h2>Cadastrar animal</h2>
+      <p class="erro" role="alert" hidden></p>
+      <div class="campo"><label for="a-nome">Nome</label><input id="a-nome" name="nome" required></div>
+      <div class="linha2">
+        <div class="campo"><label for="a-especie">Espécie</label><input id="a-especie" name="especie" required minlength="3" placeholder="Ex.: Cachorro"></div>
+        <div class="campo"><label for="a-idade">Idade (anos)</label><input id="a-idade" name="idade" type="number" min="0" step="1" required></div>
       </div>
-    </div>
-  </header>
+      <div class="campo"><label for="a-situacao">Situação</label>
+        <select id="a-situacao" name="situacao"><option value="Disponivel">Disponível</option><option value="Em processo">Em processo</option><option value="Adotado">Adotado</option></select></div>
+      <div class="campo"><label for="a-cover">Link da foto (opcional)</label><input id="a-cover" name="cover" type="url" placeholder="https://…"></div>
+      <div class="dlg-acoes"><button class="btn btn-borda" type="button" id="fechar">Cancelar</button><button class="btn btn-rosa" type="submit">Salvar animal</button></div>
+    </form>
+  </dialog>
+</main>
+<footer id="rodape"></footer>
+<script src="/js/app.js"></script>
+<script>
+(async () => {
+  await iniciar();
+  const lista = $("#lista"), vazio = $("#vazio"), dlg = $("#dlg"), form = $("#form-animal");
+  const filtros = { animal: $("#f-especie"), anos: $("#f-idade"), disponibilidade: $("#f-situacao") };
 
-  <p id="mensagem-animais" class="mensagem" aria-live="polite">Carregando animais...</p>
-  <main class="grid-animais" id="lista-animais"></main>
-      <footer class="site-footer">
-        <p>AdotaPET — Adoção responsável transforma vidas.</p>
-    </footer>
-  <script src="/animais.js"></script>
-  <script src="/navbar.js"></script>
+  async function carregar() {
+    const q = new URLSearchParams();
+    for (const [k, el] of Object.entries(filtros)) if (el.value.trim() !== "") q.set(k, el.value.trim());
+    try {
+      const dados = await api("/api/animais" + (q.toString() ? "?" + q : ""));
+      lista.innerHTML = dados.map((a) => cartaoAnimal(a, true)).join("");
+      vazio.hidden = dados.length > 0;
+      $("#contagem").textContent = `${dados.length} ${dados.length === 1 ? "animal encontrado" : "animais encontrados"}`;
+    } catch (e) {
+      lista.innerHTML = ""; vazio.hidden = false; $("#vazio-msg").textContent = e.message; $("#contagem").textContent = "";
+    }
+  }
+  let t; filtros.animal.addEventListener("input", () => { clearTimeout(t); t = setTimeout(carregar, 300); });
+  filtros.anos.addEventListener("input", () => { clearTimeout(t); t = setTimeout(carregar, 300); });
+  filtros.disponibilidade.addEventListener("change", carregar);
+  $("#filtros").addEventListener("reset", () => setTimeout(carregar));
+  $("#filtros").addEventListener("submit", (e) => e.preventDefault());
+
+  lista.addEventListener("click", async (e) => {
+    const card = e.target.closest(".pet"); if (!card) return;
+    const id = card.dataset.id;
+    if (e.target.closest("[data-adotar]")) { if (await adotar(id)) carregar(); }
+    if (e.target.closest("[data-excluir]")) {
+      if (!confirm("Excluir este animal? Esta ação não pode ser desfeita.")) return;
+      try { await api(`/api/animais/${id}`, { method: "DELETE" }); aviso("Animal excluído."); carregar(); } catch (er) { aviso(er.message, true); }
+    }
+  });
+  lista.addEventListener("change", async (e) => {
+    const sel = e.target.closest("[data-situacao]"); if (!sel) return;
+    try { await api(`/api/animais/${sel.closest(".pet").dataset.id}`, { method: "PUT", body: { situacao: sel.value } }); aviso("Situação atualizada."); carregar(); }
+    catch (er) { aviso(er.message, true); carregar(); }
+  });
+
+  $("#abrir-novo").addEventListener("click", () => { form.reset(); mostrarErro(form, ""); dlg.showModal(); });
+  $("#fechar").addEventListener("click", () => dlg.close());
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(form));
+    try {
+      await api("/animais", { method: "POST", body: { nome: d.nome.trim(), especie: d.especie.trim(), idade: Number(d.idade), situacao: d.situacao, cover: d.cover.trim() } });
+      dlg.close(); aviso("Animal cadastrado."); carregar();
+    } catch (er) { mostrarErro(form, er.message); }
+  });
+  carregar();
+})();
+</script>
 </body>
 </html>

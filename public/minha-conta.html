@@ -1,66 +1,57 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha conta - AdotaPET</title>
-    <link rel="stylesheet" href="/style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Minha conta | Casa de Patas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap">
+<link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <header class="site-header">
-        <a class="brand" href="/">AdotaPET</a>
-        <nav aria-label="Navegação principal">
-            <a href="/" aria-current="page">Início</a>
-            <a href="/conta" data-nav-register>Cadastro</a>
-            <a href="/minha-conta" data-nav-account>Minha conta</a>
-            <a href="/animais">Animais</a>
-            <a href="/abrigos">Abrigos</a>
-            <a href="/contact">Contato</a>
-        </nav>
-</header>
-    <main class="account-page">
-        <div class="account-content">
-            <div class="account-heading">
-                <div>
-                    <p class="eyebrow">Seu espaço AdotaPET</p>
-                    <h1>Olá, <span id="nome-usuario">...</span></h1>
-                    <p>Acompanhe seus processos de adoção.</p>
-                </div>
-                <div class="account-actions">
-                    <button class="button-secondary" id="botao-editar-perfil" type="button" aria-expanded="false" aria-controls="formulario-perfil">Editar perfil</button>
-                    <button class="button-secondary" id="botao-sair" type="button">Sair da conta</button>
-                </div>
-            </div>
-
-            <form class="profile-form" id="formulario-perfil" hidden>
-                <div class="profile-field">
-                    <label for="perfil-nome">Nome</label>
-                    <input id="perfil-nome" name="nome" type="text" required>
-                </div>
-
-                <div class="profile-field">
-                    <label for="perfil-email">E-mail</label>
-                    <input id="perfil-email" name="email" type="email" required>
-                </div>
-
-                <div class="profile-form-actions">
-                    <button type="submit">Salvar alterações</button>
-                    <p id="mensagem-perfil" aria-live="polite"></p>
-                </div>
-            </form>
-
-            <section class="account-panel" aria-labelledby="adocoes-titulo">
-                <h2 id="adocoes-titulo">Minhas adoções</h2>
-                <p id="mensagem-conta" class="registration-message" aria-live="polite">Carregando...</p>
-                <ul class="animal-list" id="lista-adocoes"></ul>
-            </section>
-        </div>
-    </main>
-
-    <footer class="site-footer">
-        <p>AdotaPET — Adoção responsável transforma vidas.</p>
-    </footer>
-    <script src="/minha-conta.js"></script>
-    <script src="/navbar.js"></script>
+<header class="topo" id="topo"></header>
+<main>
+  <h1>Minha conta</h1>
+  <div class="conta">
+    <section class="painel largo">
+      <h2>Meus dados</h2>
+      <form id="form" novalidate>
+        <p class="erro" role="alert" hidden></p>
+        <div class="campo"><label for="nome">Nome</label><input id="nome" name="nome" required></div>
+        <div class="campo"><label for="email">E-mail</label><input id="email" name="email" type="email" required></div>
+        <button class="btn btn-rosa" type="submit">Salvar alterações</button>
+      </form>
+    </section>
+    <section>
+      <h2>Minhas adoções</h2>
+      <div id="adocoes" aria-live="polite"></div>
+    </section>
+  </div>
+</main>
+<footer id="rodape"></footer>
+<script src="/js/app.js"></script>
+<script>
+(async () => {
+  await iniciar();
+  const form = $("#form");
+  let conta;
+  try { conta = await api("/api/minha-conta"); }
+  catch { return (location.href = "/login?next=/minha-conta"); }
+  form.nome.value = conta.nome; form.email.value = conta.email;
+  const lista = conta.adocoes || [];
+  $("#adocoes").innerHTML = lista.length
+    ? lista.map((a) => `<div class="adocao"><div><h3>${esc(a.animal.nome)}</h3><p>${esc(a.animal.especie)}, ${idadeTxt(a.animal.idade)}</p></div>${selo(a.status)}</div>`).join("")
+    : `<div class="vazio"><div class="arco sem-foto"></div><p style="margin:0 auto 1rem">Você ainda não demonstrou interesse em nenhum animal.</p><a class="btn btn-rosa" href="/animais">Ver animais disponíveis</a></div>`;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    try {
+      const r = await api("/api/minha-conta", { method: "PUT", body: { nome: form.nome.value.trim(), email: form.email.value.trim() } });
+      mostrarErro(form, ""); aviso(r.mensagem);
+      const el = $("#sessao-nome"); if (el) el.textContent = "Olá, " + r.usuario.nome.split(" ")[0];
+    } catch (er) { mostrarErro(form, er.message); }
+  });
+})();
+</script>
 </body>
 </html>

@@ -1,52 +1,68 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AdotaPET - Encontre seu melhor amigo</title>
-    <link rel="stylesheet" href="/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Início | Casa de Patas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap">
+<link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <header class="site-header">
-        <a class="brand" href="/">AdotaPET</a>
-        <nav aria-label="Navegação principal">
-            <a href="/" aria-current="page">Início</a>
-            <a href="/conta" data-nav-register>Cadastro</a>
-            <a href="/minha-conta" data-nav-account>Minha conta</a>
-            <a href="/animais">Animais</a>
-            <a href="/abrigos">Abrigos</a>
-            <a href="/contact">Contato</a>
-        </nav>
-    </header>
-
-    <main>
-        <section class="hero">
-            <div class="content">
-                <p class="eyebrow">Adoção responsável</p>
-                <h1>Encontre seu novo melhor amigo</h1>
-                <p>Conheça animais que estão esperando por um lar amoroso.</p>
-                <a class="button" href="/animais">Ver animais disponíveis</a>
-            </div>
-        </section>
-
-        <section class="content about">
-            <h2>Sobre o AdotaPET</h2>
-            <p>O AdotaPET conecta abrigos de animais a pessoas interessadas em adotar. Nosso objetivo é facilitar o processo de adoção e ajudar cada animal a encontrar um lar amoroso.</p>
-            <h3>Como ajudamos:</h3>
-            <ul class="feature-list">
-                <li>Para adotantes: encontre pets e conheça informações importantes sobre eles.</li>
-                <li>Para abrigos e ONGs: divulgue animais disponíveis e acompanhe o processo de adoção.</li>
-                <li>Para os animais: aumente as chances de encontrar uma família preparada para acolhê-los.</li>
-            </ul>
-        </section>
-    </main>
-
-    <footer class="site-footer">
-        <p>AdotaPET — Adoção responsável transforma vidas.</p>
-    </footer>
-    <script src="/navbar.js"></script>
+<header class="topo" id="topo"></header>
+<main>
+  <section class="hero">
+    <div>
+      <h1>Um novo amigo está esperando por você</h1>
+      <p class="lead">Conheça os animais que procuram um lar e os abrigos que cuidam deles. Demonstre interesse em poucos cliques e acompanhe a adoção na sua conta.</p>
+      <div class="acoes">
+        <a class="btn btn-rosa" href="/animais">Ver animais disponíveis</a>
+        <a class="btn btn-borda" href="/abrigos">Conhecer os abrigos</a>
+      </div>
+    </div>
+    <div class="hero-arcos" id="hero-arcos" aria-label="Alguns animais disponíveis"></div>
+  </section>
+  <p class="faixa" id="faixa" hidden></p>
+  <section>
+    <h2>Como funciona</h2>
+    <ol class="passos">
+      <li><h3>Crie sua conta</h3><p>Cadastre nome, e-mail e senha para poder demonstrar interesse.</p></li>
+      <li><h3>Escolha um animal</h3><p>Filtre por espécie, idade e situação até encontrar o seu par.</p></li>
+      <li><h3>Acompanhe a adoção</h3><p>O animal fica “Em processo” e passa a “Adotado” quando a adoção termina. Você vê tudo em Minha conta.</p></li>
+    </ol>
+  </section>
+  <section class="secao" id="destaques-sec" hidden>
+    <div class="secao-topo"><h2>Esperando por um lar</h2><a href="/animais">Ver todos</a></div>
+    <div class="grade" id="destaques"></div>
+  </section>
+</main>
+<footer id="rodape"></footer>
+<script src="/js/app.js"></script>
+<script>
+(async () => {
+  await iniciar();
+  const [animais, abrigos] = await Promise.all([api("/api/animais").catch(() => []), api("/api/abrigos").catch(() => [])]);
+  const disp = animais.filter((a) => a.situacao === "Disponivel");
+  const arcos = $("#hero-arcos");
+  const tres = disp.slice(0, 3);
+  arcos.innerHTML = tres.length
+    ? tres.map((a) => `<a href="/animais">${fotoAnimal(a)}<span class="nome">${esc(a.nome)}</span></a>`).join("")
+    : [1, 2, 3].map(() => `<a href="/animais"><div class="arco sem-foto"></div></a>`).join("");
+  if (animais.length || abrigos.length) {
+    const f = $("#faixa");
+    f.textContent = `${disp.length} ${disp.length === 1 ? "animal disponível" : "animais disponíveis"} para adoção em ${abrigos.length} ${abrigos.length === 1 ? "abrigo cadastrado" : "abrigos cadastrados"}.`;
+    f.hidden = false;
+  }
+  if (disp.length) {
+    $("#destaques").innerHTML = disp.slice(0, 4).map((a) => cartaoAnimal(a)).join("");
+    $("#destaques-sec").hidden = false;
+    $("#destaques").addEventListener("click", async (e) => {
+      const b = e.target.closest("[data-adotar]"); if (!b) return;
+      if (await adotar(b.closest(".pet").dataset.id)) location.href = "/minha-conta";
+    });
+  }
+})();
+</script>
 </body>
 </html>

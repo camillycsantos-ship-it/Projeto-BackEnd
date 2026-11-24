@@ -1,36 +1,87 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abrigos - AdotaPET</title>
-    <link rel="icon" href="./img/favicon.ico" type="image/svg+xml">
-    <link rel="stylesheet" href="/style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Abrigos | Casa de Patas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap">
+<link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <header class="site-header">
-        <a class="brand" href="/">AdotaPET</a>
-        <nav aria-label="Navegação principal">
-            <a href="/">Início</a>
-            <a href="/conta" data-nav-register>Cadastro</a>
-            <a href="/minha-conta" data-nav-account>Minha conta</a>
-            <a href="/animais">Animais</a>
-            <a href="/abrigos" aria-current="page">Abrigos</a>
-            <a href="/contact">Contato</a>
-        </nav>
-    </header>
+<header class="topo" id="topo"></header>
+<main>
+  <div class="secao-topo">
+    <div><h1>Abrigos</h1><p class="suave" id="contagem">Carregando…</p></div>
+    <button class="btn btn-rosa" type="button" id="abrir-novo">Cadastrar abrigo</button>
+  </div>
+  <div class="grade" id="lista" aria-live="polite"></div>
+  <div class="vazio" id="vazio" hidden><div class="arco sem-foto"></div><p id="vazio-msg" style="margin:0 auto">Nenhum abrigo cadastrado ainda. Cadastre o primeiro.</p></div>
 
-    <main class="content page-content">
-        <h1>Encontre um abrigo perto de você</h1>
-        <p id="mensagem-abrigos" class="registration-message" aria-live="polite">Carregando abrigos...</p>
-        <ul class="shelter-list" id="lista-abrigos"></ul>
-        <a class="button" href="/">Voltar ao início</a>
-    </main>
+  <dialog id="dlg">
+    <form id="form-abrigo" method="dialog">
+      <h2>Cadastrar abrigo</h2>
+      <p class="erro" role="alert" hidden></p>
+      <div class="campo"><label for="b-nome">Nome do abrigo</label><input id="b-nome" name="nome" required></div>
+      <div class="linha2">
+        <div class="campo"><label for="b-rua">Rua</label><input id="b-rua" name="rua" required></div>
+        <div class="campo"><label for="b-numero">Número</label><input id="b-numero" name="numero" type="number" min="0" required></div>
+      </div>
+      <div class="linha2">
+        <div class="campo"><label for="b-bairro">Bairro</label><input id="b-bairro" name="bairro" required></div>
+        <div class="campo"><label for="b-comp">Complemento (opcional)</label><input id="b-comp" name="complemento"></div>
+      </div>
+      <div class="campo"><label for="b-aval">Avaliação</label>
+        <select id="b-aval" name="avaliacao"><option value="5">5 estrelas</option><option value="4">4 estrelas</option><option value="3">3 estrelas</option><option value="2">2 estrelas</option><option value="1">1 estrela</option><option value="0">Sem avaliação</option></select></div>
+      <div class="dlg-acoes"><button class="btn btn-borda" type="button" id="fechar">Cancelar</button><button class="btn btn-rosa" type="submit">Salvar abrigo</button></div>
+    </form>
+  </dialog>
+</main>
+<footer id="rodape"></footer>
+<script src="/js/app.js"></script>
+<script>
+(async () => {
+  await iniciar();
+  const lista = $("#lista"), vazio = $("#vazio"), dlg = $("#dlg"), form = $("#form-abrigo");
+  const endereco = (e) => typeof e === "string" ? e : e ? `${e.rua}, ${e.numero} - ${e.bairro}${e.complemento ? " (" + e.complemento + ")" : ""}` : "";
+  const estrelas = (n) => `<div class="estrelas" role="group" aria-label="Avaliação">${[1, 2, 3, 4, 5].map((i) => `<button type="button" data-nota="${i}" class="${i <= n ? "on" : ""}" aria-label="Avaliar com ${i} ${i === 1 ? "estrela" : "estrelas"}">★</button>`).join("")}<span>${n}/5</span></div>`;
 
-    <footer class="site-footer">
-        <p>AdotaPET — Adoção responsável transforma vidas.</p>
-    </footer>
-    <script src="/abrigos.js"></script>
-    <script src="/navbar.js"></script>
+  async function carregar() {
+    try {
+      const dados = await api("/api/abrigos");
+      lista.innerHTML = dados.map((b) => `<article class="abrigo" data-id="${esc(b._id)}">
+        <h3>${esc(b.nome)}</h3><address>${esc(endereco(b.endereco))}</address>
+        ${estrelas(Math.min(5, b.avaliacao))}
+        <div><button class="btn-link" type="button" data-excluir>Excluir abrigo</button></div></article>`).join("");
+      vazio.hidden = dados.length > 0;
+      $("#contagem").textContent = `${dados.length} ${dados.length === 1 ? "abrigo cadastrado" : "abrigos cadastrados"}`;
+    } catch (e) { lista.innerHTML = ""; vazio.hidden = false; $("#vazio-msg").textContent = e.message; $("#contagem").textContent = ""; }
+  }
+  lista.addEventListener("click", async (e) => {
+    const card = e.target.closest(".abrigo"); if (!card) return;
+    const id = card.dataset.id, nota = e.target.closest("[data-nota]");
+    if (nota) {
+      try { await api(`/api/abrigos/${id}`, { method: "PUT", body: { avaliacao: Number(nota.dataset.nota) } }); aviso("Avaliação atualizada."); carregar(); }
+      catch (er) { aviso(er.message, true); }
+    }
+    if (e.target.closest("[data-excluir]")) {
+      if (!confirm("Excluir este abrigo? Esta ação não pode ser desfeita.")) return;
+      try { await api(`/abrigos/${id}`, { method: "DELETE" }); aviso("Abrigo excluído."); carregar(); } catch (er) { aviso(er.message, true); }
+    }
+  });
+  $("#abrir-novo").addEventListener("click", () => { form.reset(); mostrarErro(form, ""); dlg.showModal(); });
+  $("#fechar").addEventListener("click", () => dlg.close());
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(form));
+    const end = { rua: d.rua.trim(), bairro: d.bairro.trim(), numero: Number(d.numero) };
+    if (d.complemento.trim()) end.complemento = d.complemento.trim();
+    try { await api("/abrigos", { method: "POST", body: { nome: d.nome.trim(), endereco: end, avaliacao: Number(d.avaliacao) } }); dlg.close(); aviso("Abrigo cadastrado."); carregar(); }
+    catch (er) { mostrarErro(form, er.message); }
+  });
+  carregar();
+})();
+</script>
 </body>
 </html>

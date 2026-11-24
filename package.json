@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx watch server.ts"
+    "dev": "tsx watch server.ts",
+    "postinstall": "prisma skills sync || exit 0"
   },
   "repository": {
     "type": "git",
@@ -18,6 +19,8 @@
   },
   "homepage": "https://github.com/camillycsantos-ship-it/Projeto-BackEnd#readme",
   "dependencies": {
+    "@prisma/adapter-pg": "^7.10.1",
+    "@prisma/client": "^7.10.1",
     "dotenv": "^18.0.9",
     "env": "^0.0.2",
     "express": "^5.3.0",
@@ -34,6 +37,7 @@
     "@types/mongoose": "^5.11.96",
     "@types/node": "^26.6.6",
     "@types/swagger-ui-express": "^4.1.8",
+    "prisma": "^7.10.1",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3"
   }

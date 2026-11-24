@@ -1,54 +1,38 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Criar Conta - AdotaPET</title>
-    <link rel="stylesheet" href="/style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Conta | Casa de Patas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap">
+<link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <header class="site-header">
-        <a class="brand" href="/">AdotaPET</a>
-        <nav aria-label="Navegação principal">
-            <a href="/" aria-current="page">Início</a>
-            <a href="/conta" data-nav-register>Cadastro</a>
-            <a href="/minha-conta" data-nav-account>Minha conta</a>
-            <a href="/animais">Animais</a>
-            <a href="/abrigos">Abrigos</a>
-            <a href="/contact">Contato</a>
-        </nav>
-    </header>
-
-    <main class="registration-page">
-        <section class="registration-card" aria-labelledby="registration-title">
-            <p class="eyebrow">Faça parte da nossa comunidade</p>
-            <h1 id="registration-title">Crie sua conta</h1>
-            <p class="registration-intro">Cadastre-se para acompanhar sua jornada de adoção com o AdotaPET.</p>
-
-            <form class="registration-form" id="formCadastro">
-                <div class="form-field">
-                    <label for="nome">Nome</label>
-                    <input type="text" id="nome" name="nome" placeholder="Como podemos te chamar?" autocomplete="name" required>
-                </div>
-                <div class="form-field">
-                    <label for="email">E-mail</label>
-                    <input type="email" id="email" name="email" placeholder="voce@exemplo.com" autocomplete="email" required>
-                </div>
-                <div class="form-field">
-                    <label for="senha">Senha</label>
-                    <input type="password" id="senha" name="senha" placeholder="Crie uma senha" autocomplete="new-password" required>
-                </div>
-                <button class="button registration-submit" type="submit">Criar conta</button>
-            </form>
-            <p class="registration-message" id="mensagem" aria-live="polite"></p>
-            <p class="login-register-link">Já tem conta? <a href="/login">Entrar</a></p>
-        </section>
-    </main>
-
-    <footer class="site-footer">
-        <p>AdotaPET — Adoção responsável transforma vidas.</p>
-    </footer>
-    <script src="cadastro.js"></script>
-    <script src="/navbar.js"></script>
+<header class="topo" id="topo"></header>
+<main>
+  <div class="painel" style="text-align:center">
+    <div class="arco sem-foto" style="width:90px;margin:0 auto 1rem"></div>
+    <h1 style="font-size:2rem" id="titulo">Sua conta</h1>
+    <p class="suave" id="texto" style="margin-inline:auto"></p>
+    <div class="acoes" id="acoes" style="justify-content:center"></div>
+  </div>
+</main>
+<footer id="rodape"></footer>
+<script src="/js/app.js"></script>
+<script>
+(async () => {
+  await iniciar();
+  if (SESSAO) {
+    $("#titulo").textContent = `Olá, ${SESSAO.nome.split(" ")[0]}`;
+    $("#texto").textContent = "Veja suas adoções ou procure um novo amigo.";
+    $("#acoes").innerHTML = `<a class="btn btn-rosa" href="/minha-conta">Minha conta</a><a class="btn btn-borda" href="/animais">Ver animais</a>`;
+  } else {
+    $("#texto").textContent = "Entre ou crie uma conta para demonstrar interesse em um animal.";
+    $("#acoes").innerHTML = `<a class="btn btn-rosa" href="/login">Entrar</a><a class="btn btn-borda" href="/cadastro">Criar conta</a>`;
+  }
+})();
+</script>
 </body>
 </html>

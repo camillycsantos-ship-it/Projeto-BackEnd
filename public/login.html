@@ -1,50 +1,45 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entrar - AdotaPET</title>
-    <link rel="stylesheet" href="/style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Entrar | Casa de Patas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap">
+<link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <header class="site-header">
-        <a class="brand" href="/">AdotaPET</a>
-        <nav aria-label="Navegação principal">
-            <a href="/" aria-current="page">Início</a>
-            <a href="/conta" data-nav-register>Cadastro</a>
-            <a href="/minha-conta" data-nav-account>Minha conta</a>
-            <a href="/animais">Animais</a>
-            <a href="/abrigos">Abrigos</a>
-            <a href="/contact">Contato</a>
-        </nav>
-    </header>
-
-    <main class="registration-page">
-        <section class="registration-card" aria-labelledby="login-title">
-            <p class="eyebrow">Que bom ter você de volta</p>
-            <h1 id="login-title">Entrar na sua conta</h1>
-            <p class="registration-intro">Acesse sua conta AdotaPET para continuar.</p>
-
-            <form class="registration-form" id="formLogin">
-                <div class="form-field">
-                    <label for="email">E-mail</label>
-                    <input type="email" id="email" name="email" placeholder="voce@exemplo.com" autocomplete="email" required>
-                </div>
-                <div class="form-field">
-                    <label for="senha">Senha</label>
-                    <input type="password" id="senha" name="senha" placeholder="Sua senha" autocomplete="current-password" required>
-                </div>
-                <button class="button registration-submit" type="submit">Entrar</button>
-            </form>
-            <p class="registration-message" id="mensagem" aria-live="polite"></p>
-            <p class="login-register-link">Ainda não tem conta? <a href="/conta">Cadastre-se</a></p>
-        </section>
-    </main>
-
-    <footer class="site-footer">
-        <p>AdotaPET — Adoção responsável transforma vidas.</p>
-    </footer>
-    <script src="./login.js"></script>
-    <script src="/navbar.js"></script>
+<header class="topo" id="topo"></header>
+<main>
+  <div class="painel">
+    <h1 style="font-size:2rem">Entrar na sua conta</h1>
+    <p class="aviso" id="ok" hidden>Conta criada. Entre para continuar.</p>
+    <form id="form" novalidate>
+      <p class="erro" role="alert" hidden></p>
+      <div class="campo"><label for="email">E-mail</label><input id="email" name="email" type="email" autocomplete="email" required></div>
+      <div class="campo"><label for="senha">Senha</label><input id="senha" name="senha" type="password" autocomplete="current-password" required></div>
+      <button class="btn btn-rosa" style="width:100%" type="submit">Entrar</button>
+    </form>
+    <p class="suave" style="margin:1rem 0 0">Ainda não tem conta? <a href="/cadastro">Criar conta</a></p>
+  </div>
+</main>
+<footer id="rodape"></footer>
+<script src="/js/app.js"></script>
+<script>
+(async () => {
+  await iniciar();
+  if (SESSAO) return location.replace("/minha-conta");
+  if (new URLSearchParams(location.search).has("cadastrado")) $("#ok").hidden = false;
+  const form = $("#form");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(form));
+    if (!d.email.trim() || !d.senha) return mostrarErro(form, "Informe e-mail e senha.");
+    try { await api("/login", { method: "POST", body: { email: d.email.trim(), senha: d.senha } }); location.href = destinoSeguro(); }
+    catch (er) { mostrarErro(form, er.message); }
+  });
+})();
+</script>
 </body>
 </html>
