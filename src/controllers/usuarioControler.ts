@@ -30,7 +30,7 @@ class UsuarioController{
                 }
             }];
         });
-        return res.status(200).json({ nome: usuario.nome, email: usuario.email, adocoes });
+        return res.status(200).json({ id: usuario._id.toString(), nome: usuario.nome, email: usuario.email, adocoes });
         }catch (error) {
             console.error("Erro ao carregar conta:", error);
             return res.status(404).json({ mensagem: "Não foi possível carregar sua conta." });
@@ -43,12 +43,12 @@ class UsuarioController{
         }
 
         try {
-            const usuario = await Usuario.findById(req.session.userId).select("nome");
+            const usuario = await Usuario.findById(req.session.userId).select("nome admin");
             if (!usuario) {
                 return res.status(404).json({ mensagem: "Usuário não encontrado." });
             }
 
-            return res.status(200).json({ nome: usuario.nome });
+            return res.status(200).json({ nome: usuario.nome, admin: Boolean(usuario.admin) });
         } catch (error) {
             console.error("Erro ao verificar sessão:", error);
             return res.status(404).json({ mensagem: "Não foi possível verificar a sessão." });
@@ -241,10 +241,13 @@ class UsuarioController{
             if (!usuarioRemovido) {
             return res.status(404).json({ erro: "Usuario não encontrado." });
         }
-        return res.status(200).json({
-            mensagem: "Usuario deletado com sucesso.",
-            usuario: usuarioRemovido
-        });
+        if (id === req.session.userId) {
+            return req.session.destroy(() => {
+                res.clearCookie("connect.sid");
+                return res.status(200).json({ mensagem: "Sua conta foi excluída." });
+            });
+        }
+        return res.status(200).json({ mensagem: "Usuario deletado com sucesso." });
         }catch(error){
             console.error("Erro ao deletar usuario:", error);
             return res.status(404).json({ erro: "Não foi possível deletar o usuario." });

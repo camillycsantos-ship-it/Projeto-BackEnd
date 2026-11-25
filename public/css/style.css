@@ -79,8 +79,8 @@ a{color:var(--rosa-700)}
 .abrigo h3{margin:0}
 .abrigo address{font-style:normal;color:var(--suave)}
 .estrelas{display:flex;align-items:center;gap:.1rem;margin-top:.3rem}
-.estrelas button{background:none;border:0;padding:0 .05rem;font-size:1.4rem;line-height:1;color:var(--rosa-200);cursor:pointer}
-.estrelas button.on{color:var(--rosa-500)}.estrelas button:hover{transform:scale(1.15)}
+.estrelas b{font-weight:400;padding:0 .05rem;font-size:1.4rem;line-height:1;color:var(--rosa-200)}
+.estrelas b.on{color:var(--rosa-500)}
 .estrelas span{margin-left:.4rem;font-size:.85rem;color:var(--suave)}
 
 /* formularios */

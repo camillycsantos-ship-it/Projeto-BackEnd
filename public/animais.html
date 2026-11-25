@@ -55,7 +55,7 @@
     for (const [k, el] of Object.entries(filtros)) if (el.value.trim() !== "") q.set(k, el.value.trim());
     try {
       const dados = await api("/api/animais" + (q.toString() ? "?" + q : ""));
-      lista.innerHTML = dados.map((a) => cartaoAnimal(a, true)).join("");
+      lista.innerHTML = dados.map((a) => cartaoAnimal(a)).join("");
       vazio.hidden = dados.length > 0;
       $("#contagem").textContent = `${dados.length} ${dados.length === 1 ? "animal encontrado" : "animais encontrados"}`;
     } catch (e) {
@@ -72,15 +72,6 @@
     const card = e.target.closest(".pet"); if (!card) return;
     const id = card.dataset.id;
     if (e.target.closest("[data-adotar]")) { if (await adotar(id)) carregar(); }
-    if (e.target.closest("[data-excluir]")) {
-      if (!confirm("Excluir este animal? Esta ação não pode ser desfeita.")) return;
-      try { await api(`/api/animais/${id}`, { method: "DELETE" }); aviso("Animal excluído."); carregar(); } catch (er) { aviso(er.message, true); }
-    }
-  });
-  lista.addEventListener("change", async (e) => {
-    const sel = e.target.closest("[data-situacao]"); if (!sel) return;
-    try { await api(`/api/animais/${sel.closest(".pet").dataset.id}`, { method: "PUT", body: { situacao: sel.value } }); aviso("Situação atualizada."); carregar(); }
-    catch (er) { aviso(er.message, true); carregar(); }
   });
 
   $("#abrir-novo").addEventListener("click", () => { form.reset(); mostrarErro(form, ""); dlg.showModal(); });

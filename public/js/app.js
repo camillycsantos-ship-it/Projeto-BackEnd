@@ -66,9 +66,8 @@ const fotoAnimal = (a) => semCapa(a.cover)
   ? `<div class="arco sem-foto" role="img" aria-label="Sem foto de ${esc(a.nome)}"></div>`
   : `<div class="arco"><img src="${esc(a.cover)}" alt="Foto de ${esc(a.nome)}" loading="lazy" onerror="this.parentElement.classList.add('sem-foto');this.remove()"></div>`;
 
-function cartaoAnimal(a, gerenciar = false) {
+function cartaoAnimal(a) {
   const disp = a.situacao === "Disponivel";
-  const opcoes = Object.entries(SITUACOES).map(([v, [t]]) => `<option value="${v}"${a.situacao === v ? " selected" : ""}>${t}</option>`).join("");
   return `<article class="pet" data-id="${esc(a._id)}">
     ${fotoAnimal(a)}
     <div class="pet-corpo">
@@ -76,7 +75,6 @@ function cartaoAnimal(a, gerenciar = false) {
       <p class="pet-meta">${esc(a.especie)}, ${idadeTxt(a.idade)}</p>
       ${selo(a.situacao)}
       <button class="btn btn-rosa" type="button" data-adotar${disp ? "" : " disabled"}>${disp ? "Quero adotar" : "Indisponível"}</button>
-      ${gerenciar && SESSAO?.admin ? `<div class="gerencia"><select data-situacao aria-label="Situação de ${esc(a.nome)}">${opcoes}</select><button class="btn-link" type="button" data-excluir>Excluir</button></div>` : ""}
     </div></article>`;
 }
 

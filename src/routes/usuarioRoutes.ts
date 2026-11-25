@@ -1,5 +1,6 @@
 import { Router } from "express";
 import UsuarioController from "../controllers/usuarioControler.js";
+import { exigirAdminOuProprio } from "../middlewares/exigirAdmin.js";
 
 const router = Router();
 
@@ -11,7 +12,7 @@ router.post("/login", UsuarioController.login);
 router.post("/logout", UsuarioController.logout);
 router.post("/api/adocoes", UsuarioController.adocaoUsuario);
 router.put("/api/minha-conta", UsuarioController.atualizarPerfil);
-router.patch("/api/usuarios/:id/email", UsuarioController.atualizarEmail);
-router.delete("/minha-conta/:id", UsuarioController.deletarUsuario);
+router.patch("/api/usuarios/:id/email", exigirAdminOuProprio, UsuarioController.atualizarEmail);
+router.delete("/minha-conta/:id", exigirAdminOuProprio, UsuarioController.deletarUsuario);
 
 export default router;

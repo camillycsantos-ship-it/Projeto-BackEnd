@@ -45,31 +45,18 @@
   await iniciar();
   const lista = $("#lista"), vazio = $("#vazio"), dlg = $("#dlg"), form = $("#form-abrigo");
   const endereco = (e) => typeof e === "string" ? e : e ? `${e.rua}, ${e.numero} - ${e.bairro}${e.complemento ? " (" + e.complemento + ")" : ""}` : "";
-  const estrelas = (n) => `<div class="estrelas" role="group" aria-label="Avaliação">${[1, 2, 3, 4, 5].map((i) => `<button type="button" data-nota="${i}" class="${i <= n ? "on" : ""}" aria-label="Avaliar com ${i} ${i === 1 ? "estrela" : "estrelas"}">★</button>`).join("")}<span>${n}/5</span></div>`;
+  const estrelas = (n) => `<div class="estrelas" role="img" aria-label="Avaliação: ${n} de 5">${[1, 2, 3, 4, 5].map((i) => `<b class="${i <= n ? "on" : ""}" aria-hidden="true">★</b>`).join("")}<span>${n}/5</span></div>`;
 
   async function carregar() {
     try {
       const dados = await api("/api/abrigos");
       lista.innerHTML = dados.map((b) => `<article class="abrigo" data-id="${esc(b._id)}">
         <h3>${esc(b.nome)}</h3><address>${esc(endereco(b.endereco))}</address>
-        ${estrelas(Math.min(5, b.avaliacao))}
-        <div><button class="btn-link" type="button" data-excluir>Excluir abrigo</button></div></article>`).join("");
+        ${estrelas(Math.min(5, b.avaliacao))}</article>`).join("");
       vazio.hidden = dados.length > 0;
       $("#contagem").textContent = `${dados.length} ${dados.length === 1 ? "abrigo cadastrado" : "abrigos cadastrados"}`;
     } catch (e) { lista.innerHTML = ""; vazio.hidden = false; $("#vazio-msg").textContent = e.message; $("#contagem").textContent = ""; }
   }
-  lista.addEventListener("click", async (e) => {
-    const card = e.target.closest(".abrigo"); if (!card) return;
-    const id = card.dataset.id, nota = e.target.closest("[data-nota]");
-    if (nota) {
-      try { await api(`/api/abrigos/${id}`, { method: "PUT", body: { avaliacao: Number(nota.dataset.nota) } }); aviso("Avaliação atualizada."); carregar(); }
-      catch (er) { aviso(er.message, true); }
-    }
-    if (e.target.closest("[data-excluir]")) {
-      if (!confirm("Excluir este abrigo? Esta ação não pode ser desfeita.")) return;
-      try { await api(`/abrigos/${id}`, { method: "DELETE" }); aviso("Abrigo excluído."); carregar(); } catch (er) { aviso(er.message, true); }
-    }
-  });
   $("#abrir-novo").addEventListener("click", () => { form.reset(); mostrarErro(form, ""); dlg.showModal(); });
   $("#fechar").addEventListener("click", () => dlg.close());
   form.addEventListener("submit", async (e) => {

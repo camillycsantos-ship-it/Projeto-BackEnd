@@ -53,13 +53,13 @@ class AnimalController{
 
     static async cadastrar (req: Request, res: Response) {
         try{
-        const { nome, especie, idade, situacao, cover } = req.body;
+        const { nome, especie, idade, cover } = req.body;
         const novoAnimal = await Animal.create({
             nome,
             especie,
             idade,
             cover,
-            situacao: situacao || "Disponivel"
+            situacao: "Disponivel"
         });
         res.status(200).json(novoAnimal);
     }catch (error) {

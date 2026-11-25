@@ -35,6 +35,11 @@ const usuarioSchema = new mongoose.Schema({
     adocoes: {
         type: [adocaoSchema],
         default: []
+    },
+
+    admin: {
+        type: Boolean,
+        default: false
     }
 
 });
