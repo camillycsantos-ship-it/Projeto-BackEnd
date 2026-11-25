@@ -8,7 +8,7 @@ export const swaggerDocument = {
   },
   servers: [
     {
-      url: "http://localhost:3000",
+      url: "http://localhost:8080",
       description: "Servidor de Desenvolvimento",
     },
   ],
@@ -410,7 +410,7 @@ export const swaggerDocument = {
         },
       },
     },
-    "/api/abrigos/{id}": {
+    "/api/abrigos/:id": {
       put: {
         tags: ["Abrigos"],
         summary: "Atualiza os dados de um abrigo",
@@ -656,12 +656,10 @@ export const swaggerDocument = {
                   type: "object",
                   properties: {
                     message: { type: "string" },
-                    token: { type: "string" },
                   },
                 },
                 example: {
                   message: "Login realizado com sucesso.",
-                  token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
                 },
               },
             },

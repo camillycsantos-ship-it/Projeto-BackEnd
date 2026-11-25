@@ -1,5 +1,5 @@
-import app from './src/app.js';
 import 'dotenv/config';
+import app from './src/app.js';
 import conectaNaDatabase from './src/config/dbConnect.js';
 
 const port = 8080

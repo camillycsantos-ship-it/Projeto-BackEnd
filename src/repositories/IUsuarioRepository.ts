@@ -2,7 +2,7 @@ export interface UsuarioDTO {
     id?: string;
     nome: string;
     email: string;
-    semha: string;
+    senha: string;
     adocoes: Adocao[];
 }
 

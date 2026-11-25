@@ -6,7 +6,7 @@ class AbrigoController{
     static async listar (req: Request, res: Response) {
         try {
             const abrigos = await Abrigo.find().sort({ nome: 1 });
-            return res.status(200).json(abrigos);
+            return res.status(201).json(abrigos);
         }catch(error) {
             console.error("Erro ao buscar abrigos:", error);
             return res.status(404).json({ mensagem: "Não foi possível carregar os abrigos." });
@@ -26,7 +26,7 @@ class AbrigoController{
                 },
                     avaliacao
                 });
-                res.status(200).json(novoAbrigo);
+                res.status(201).json(novoAbrigo);
         }catch(error) {
             console.error("Erro ao salvar abrigo: ", error);
             res.status(404).json({ erro: "Não foi possível salvar o abrigo." });
@@ -43,7 +43,7 @@ class AbrigoController{
         if (!abrigoAtualizado) {
             return res.status(404).json({ erro: "Abrigo não encontrado." });
         }
-            return res.status(200).json(abrigoAtualizado);
+            return res.status(201).json(abrigoAtualizado);
         }catch(error) {
             console.error("Erro ao atualizar abrigo:", error);
             return res.status(404).json({ erro: "Não foi possível atualizar o abrigo." });
@@ -62,26 +62,26 @@ class AbrigoController{
                     res.status(404).json({mensagem: "Abrigo não encontrado!"});
                     return;
                 }
-                    res.status(200).json({
+                    res.status(201).json({
                         mensagem: "Abrigo atualizado parcialmente com sucesso!",
                         abrigo: abrigoAtualizado,
             });
                 }catch(error){
-                    res.status(404).json({mensagem: "Erro ao atualizar parcialmente o abrigo."})
+                    res.status(400).json({mensagem: "Erro ao atualizar parcialmente o abrigo."})
                 }
     }
 
     static async deletar (req: Request<{ id: string }>, res: Response) {
         const { id } = req.params;
         if (!mongoose.isValidObjectId(id)) {
-            return res.status(404).json({ erro: "ID informado possui formato inválido." });
+            return res.status(400).json({ erro: "ID informado possui formato inválido." });
         }
         try {
             const abrigoRemovido = await Abrigo.findByIdAndDelete(id);
         if (!abrigoRemovido) {
             return res.status(404).json({ erro: "Abrigo não encontrado." });
         }
-        return res.status(200).json({
+        return res.status(201).json({
             mensagem: "Abrigo deletado com sucesso.",
             abrigo: abrigoRemovido
         });

@@ -10,7 +10,7 @@ router.get("/api/animais", AnimalController.buscaPorFiltro);
 router.get("/api/animais/busca", AnimalController.buscaPorFiltro);
 router.get("/api/animais/:id", AnimalController.buscarPorId);
 
-router.post("/animais", validarDados(criarAnimalValidator), AnimalController.cadastrar);
+router.post("/api/animais", exigirAdmin, validarDados(criarAnimalValidator), AnimalController.cadastrar);
 router.put("/api/animais/:id", exigirAdmin, validarDados(atualizarAnimalValidator), AnimalController.atualizar);
 router.patch("/api/animais/:id", exigirAdmin, validarDados(atualizarAnimalValidator), AnimalController.atualizarParcialmente);
 
