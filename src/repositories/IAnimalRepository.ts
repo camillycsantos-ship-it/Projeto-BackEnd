@@ -14,10 +14,10 @@ export interface FiltroAnimalDTO {
 }
 
 export interface IAnimalRepository {
-    buscaPorFiltro(): Promise<any[]>;
-    buscaPorId(id: string): Promise<any[] | null>;
-    cadastrar(dados: AnimalDTO):Promise<any[]>;
-    atualizar(id: string, dados: AnimalDTO): Promise<any[]>;
-    atualizarParcialmente(id: string, dados: Partial<AnimalDTO>): Promise<any[] | null>;
+    buscaPorFiltro(filtros: FiltroAnimalDTO): Promise<AnimalDTO[]>;
+    buscaPorId(id: string): Promise<AnimalDTO | null>;
+    cadastrar(dados: AnimalDTO):Promise<AnimalDTO>;
+    atualizar(id: string, dados: AnimalDTO): Promise<AnimalDTO | null>;
+    atualizarParcialmente(id: string, dados: Partial<AnimalDTO>): Promise<AnimalDTO | null>;
     deletar(id: string ): Promise<boolean>;
 }

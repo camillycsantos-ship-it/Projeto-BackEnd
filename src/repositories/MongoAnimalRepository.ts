@@ -3,21 +3,21 @@ import type { IAnimalRepository, AnimalDTO, FiltroAnimalDTO } from "./IAnimalRep
 
 export class MongoAnimalRepository implements IAnimalRepository{
 
-    static async buscaPorId(id: string){
+    async buscaPorId(id: string){
         return await Animal.findById(id);
     }
 
-    static async buscaPorFiltro(filtros: FiltroAnimalDTO){
+    async buscaPorFiltro(filtros: FiltroAnimalDTO){
         const filtro: Record<string, any> = {};
         if(filtros.disponibilidade) filtro.situacao = filtros.disponibilidade;
         if(filtros.anos) filtro.idade = filtros.anos;
         if(filtros.animal){
-            filtro.especie = {$regex: filtros.animal, $options: "id"};
+            filtro.especie = {$regex: filtros.animal, $options: "i"};
         }
         return await Animal.find(filtro);
     }
 
-    async cadastrar(dados: AnimalDTO): {
+    async cadastrar (dados: AnimalDTO) {
         return await Animal.create({
             nome: dados.nome,
             especie: dados.especie,
@@ -27,7 +27,15 @@ export class MongoAnimalRepository implements IAnimalRepository{
         });
     }
 
-    async atualizar(id: string, dados: AnimalDTO):{
+    async atualizar (id: string, dados: AnimalDTO) {
+        return await Animal.findByIdAndUpdate(
+            id,
+            {$set: dados },
+            {new: true }
+        );
+    }
+
+    async atualizarParcialmente (id: string, dados:Partial<AnimalDTO>){
         return await Animal.findByIdAndUpdate(
             id,
             {$set: dados },
