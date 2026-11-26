@@ -14,6 +14,7 @@ export interface FiltroAnimalDTO {
 }
 
 export interface IAnimalRepository {
+    listar(): Promise<AnimalDTO[]>;
     buscaPorFiltro(filtros: FiltroAnimalDTO): Promise<AnimalDTO[]>;
     buscaPorId(id: string): Promise<AnimalDTO | null>;
     cadastrar(dados: AnimalDTO):Promise<AnimalDTO>;

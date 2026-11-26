@@ -3,6 +3,10 @@ import type { IAnimalRepository, AnimalDTO, FiltroAnimalDTO } from "./IAnimalRep
 
 export class MongoAnimalRepository implements IAnimalRepository{
 
+    async listar() {
+        return await Animal.find({});
+    }
+
     async buscaPorId(id: string){
         return await Animal.findById(id);
     }

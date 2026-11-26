@@ -1,21 +1,29 @@
 import type { Request, Response } from "express";
 import Animal from "../models/Animal.js";
 import mongoose from "mongoose";
+import type { IAnimalRepository, AnimalDTO, FiltroAnimalDTO } from "../repositories/IAnimalRepository.js";
 
 class AnimalController{
-    static async listar (req: Request, res: Response) {
+
+    private animalRepository: IAnimalRepository;
+
+    constructor(animalRepository: IAnimalRepository){
+        this.animalRepository = animalRepository;
+    }
+
+    async listar (req: Request, res: Response) {
         try{
-                const animais = await Animal.find();
-                res.status(201).json(animais);
+                const listaAnimais = await this.animalRepository.listar();
+                res.status(201).json(listaAnimais);
                 }catch(error){
                     res.status(404).json({ mensagem: "Erro ao buscar animal."});
                 }
     }
 
-    static async buscarPorId (req: Request<{ id: string }>, res: Response) {
+    async buscarPorId (req: Request<{ id: string }>, res: Response) {
             try{
                 const { id } = req.params;
-                const animalEncontrado = await Animal.findById(id);
+                const animalEncontrado = await this.animalRepository.buscaPorId(id);
 
                 if(!animalEncontrado) {
                     res.status(404).json({mensagem: "Animal não encontrado."});
@@ -23,11 +31,11 @@ class AnimalController{
                 }
                 res.status(201).json(animalEncontrado);
             }catch(error){
-                res.status(400).json({mensagem: "Erro ao encontrar animal por id."});
+                res.status(500).json({mensagem: "Erro ao encontrar animal por id."});
             }
         }
 
-    static async buscaPorFiltro ( req: Request, res: Response) {
+    async buscaPorFiltro ( req: Request, res: Response) {
         try{
             const { animal, anos, disponibilidade } = req.query;
             const filtro: Record<string, any> = {};
@@ -42,7 +50,7 @@ class AnimalController{
                 filtro.situacao = String(disponibilidade);
             }
 
-            const animaisFiltrados = await Animal.find(filtro);
+            const animaisFiltrados = await this.animalRepository.buscaPorFiltro(filtro);
 
             res.status(201).json(animaisFiltrados);
 
@@ -51,80 +59,66 @@ class AnimalController{
         }
 }
 
-    static async cadastrar (req: Request, res: Response) {
+    async cadastrar (req: Request, res: Response) {
         try{
-        const { nome, especie, idade, cover } = req.body;
-        const novoAnimal = await Animal.create({
-            nome,
-            especie,
-            idade,
-            cover,
-            situacao: "Disponivel"
-        });
+        const novoAnimal = await this.animalRepository.cadastrar(req.body);
+        
         res.status(201).json(novoAnimal);
     }catch (error) {
         console.error("Erro ao salvar animal:", error);
-        res.status(400).json({ erro: "Não foi possível salvar o animal." });
+        res.status(500).json({ erro: "Não foi possível salvar o animal." });
         }
     }
 
-    static async atualizar (req: Request, res: Response) {
+    async atualizar (req: Request<{id: string},{}>, res: Response) {
         try {
-            const animalAtualizado = await Animal.findByIdAndUpdate(
-                req.params.id,
-                { situacao: req.body.situacao },
-                { new: true }
-            );
+            const { id } = req.params;
+            const animalAtualizado = await this.animalRepository.atualizar(id, req.body);
         if (!animalAtualizado) {
             return res.status(404).json({ erro: "Animal não encontrado." });
         }
-        return res.status(201).json(animalAtualizado);
+        return res.status(200).json(animalAtualizado);
         }catch (error) {
             console.error("Erro ao atualizar animal:", error);
-            return res.status(400).json({ erro: "Não foi possível atualizar o animal." });
+            return res.status(500).json({ erro: "Não foi possível atualizar o animal." });
     }
     }
 
-    static async atualizarParcialmente (req: Request<{ id: string }>, res: Response) {
+    async atualizarParcialmente (req: Request<{ id: string }>, res: Response) {
         try{
             const { id } = req.params;
-            const animalAtualizado = await Animal.findByIdAndUpdate(
-                id,
-                {$set: req.body},
-                { new: true}
-            );
+            const animalAtualizado = await this.animalRepository.atualizarParcialmente(id, req.body);
         if(!animalAtualizado){
             res.status(404).json({mensagem: "Animal não encontrado!"});
             return;
         }
-            res.status(201).json({
+            res.status(200).json({
                 mensagem: "Animal atualizado parcialmente com sucesso!",
                 animal: animalAtualizado,
     });
         }catch(error){
-            res.status(400).json({mensagem: "Erro ao atualizar parcialmente o animal."})
+            res.status(500).json({mensagem: "Erro ao atualizar parcialmente o animal."})
         }
     }
 
-    static async deletar (req: Request<{ id: string }>, res: Response) {
-        const { id } = req.params;
-        if (!mongoose.isValidObjectId(id)) {
-        return res.status(400).json({ erro: "ID informado possui formato inválido." });
-    }
+    async deletar (req: Request<{ id: string }>, res: Response) {
         try {
-            const animalRemovido = await Animal.findByIdAndDelete(id);
-        if (!animalRemovido) {
+            const { id } = req.params;
+            const animalDeletado = await this.animalRepository.deletar(id);
+
+            if (!animalDeletado) {
             return res.status(404).json({ erro: "Animal não encontrado." });
         }
-        return res.status(201).json({
+
+        return res.status(200).json({
             mensagem: "Animal deletado com sucesso.",
-            animal: animalRemovido
+            animal: animalDeletado
         });
         }catch(error){
             console.error("Erro ao deletar animal:", error);
-            return res.status(400).json({ erro: "Não foi possível deletar o animal." });
+            return res.status(500).json({ erro: "Não foi possível deletar o animal." });
         }
     }
-}
+};
 
 export default AnimalController;
