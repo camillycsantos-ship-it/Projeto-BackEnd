@@ -1,12 +1,13 @@
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client/extension";
+import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 
-const connectionString = process.env.POSTGRE_URL;
+const connectionString = process.env.POSTGRES_URL;
 
-const pool = new pg.Pool ({ connectionString });
-const adapter = new PrismaPg (pool);
-const prisma = new PrismaClient ({adapter});
+const pool = new pg.Pool({ connectionString });
+const adapter = new PrismaPg(pool);
+
+export const prisma = new PrismaClient({ adapter });
 
 export default prisma;

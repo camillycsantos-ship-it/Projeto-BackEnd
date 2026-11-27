@@ -1,6 +1,4 @@
 import type { Request, Response } from "express";
-import Animal from "../models/Animal.js";
-import mongoose from "mongoose";
 import type { IAnimalRepository, AnimalDTO, FiltroAnimalDTO } from "../repositories/IAnimalRepository.js";
 
 class AnimalController{
